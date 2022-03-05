@@ -28,4 +28,6 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 
 ### TodoList
 
-...
+- [x] 级联选择器：多选 + 懒加载 + 动态回显 + loading
+- [ ] useSWR
+- [ ] ...
