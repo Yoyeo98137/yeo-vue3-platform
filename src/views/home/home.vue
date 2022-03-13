@@ -3,6 +3,7 @@
 
   <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
   <ElButton type="primary" size="large" @click="jumpToAbout">Go to /About</ElButton>
+  <ElButton type="primary" size="large" @click="jumpToTestSWR">Go to /TestSWR</ElButton>
 
   <div style="margin-top: 16px;">
     <p>{{ "modelCascader - " + modelCascader }}</p>
@@ -59,6 +60,11 @@ const jumpToAbout = () => {
     // query: {
     //   ...route.query,
     // },
+  })
+}
+const jumpToTestSWR = () => {
+  router.push({
+    name: 'demo',
   })
 }
 
