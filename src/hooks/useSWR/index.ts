@@ -2,7 +2,23 @@ import { Ref, ref } from "vue"
 
 type TypePromiseBooleanVal = (success: boolean) => Array<string>
 
-export const useSWR = () => {
+interface PropsConfigPage {
+  page: number
+  pageSize: number
+  total: number
+}
+interface PropsConfigSWR {
+  mode?: "GET" | "POST" | "PUT" | "DELETE"
+  pagination?: PropsConfigPage
+}
+
+/**
+ * demo - useSWR
+ * @param reqKey 请求标识
+ * @param reqConfig 额外配置项
+ * @returns 
+ */
+export const useSWR = (reqKey?: string, reqConfig?: PropsConfigSWR) => {
   const data: Ref<Array<string>> = ref([])
   const loading = ref(true)
   const error: any = ref()
@@ -11,14 +27,21 @@ export const useSWR = () => {
     return success ? ["value"] : []
   }
   const useFetch = () => {
-    new Promise((resolve) => {
-      setTimeout(() => {
-        const state = true
+    new Promise((resolve, reject) => {
+      try {
+        // todo axios..
+        setTimeout(() => {
+          const state = true
 
-        data.value = useJson(state)
+          data.value = useJson(state)
+          loading.value = false
+          resolve(state)
+        }, 1600);
+      } catch (err) {
         loading.value = false
-        resolve(state)
-      }, 1600);
+        error.value = err
+        reject(err)
+      }
     })
   }
 
