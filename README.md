@@ -29,5 +29,24 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 ### TodoList
 
 - [x] 级联选择器：多选 + 懒加载 + 动态回显 + loading
-- [ ] useSWR
+- [ ] useRequest
 - [ ] ...
+
+### useRequest
+
+**特性**
+
+- [x] 数据响应式
+- [x] 自动请求/手动请求（兼容带参函数）
+- [ ] loading delay（有效防止闪烁）
+- [ ] 基于场景延伸（高级 hook）
+- [ ] ...
+
+**场景**
+
+- [ ] 分页 usePagination
+- [ ] ...
+
+> https://github.com/vercel/swr  
+> https://www.attojs.com/  
+> https://ahooks.gitee.io/zh-CN  

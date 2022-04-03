@@ -4,6 +4,7 @@
   <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
   <ElButton type="primary" size="large" @click="jumpToAbout">Go to /About</ElButton>
   <ElButton type="primary" size="large" @click="jumpToTestSWR">Go to /TestSWR</ElButton>
+  <ElButton type="primary" size="large" @click="jumpToTestRequest">Go to /TestRequest</ElButton>
 
   <div style="margin-top: 16px;">
     <p>{{ "modelCascader - " + modelCascader }}</p>
@@ -65,6 +66,11 @@ const jumpToAbout = () => {
 const jumpToTestSWR = () => {
   router.push({
     name: 'demo',
+  })
+}
+const jumpToTestRequest = () => {
+  router.push({
+    name: 'doRequest',
   })
 }
 

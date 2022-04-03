@@ -65,12 +65,4 @@ const { data, loading } = useSWR()
   width: 702px;
   text-align: left;
 }
-
-/* element 的样式有覆盖问题 */
-.el-loading-spinner {
-  display: block;
-}
-.el-loading-spinner .path {
-  stroke: #409eff;
-}
 </style>

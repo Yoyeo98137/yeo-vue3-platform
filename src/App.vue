@@ -16,4 +16,12 @@
   color: #2c3e50;
   margin-top: 60px;
 }
+
+/* element 的样式有覆盖问题 */
+.el-loading-spinner {
+  display: block;
+}
+.el-loading-spinner .path {
+  stroke: #409eff;
+}
 </style>
