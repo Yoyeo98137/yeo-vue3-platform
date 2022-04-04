@@ -42,7 +42,13 @@ export function useRequest<TRequset, TParams>(service: any, options?: PropsReque
   /** 是否开启延迟加载 */
   const isLoadingDelay = () => options?.loadingDelay
 
+  const clearTimerAll = () => {
+    delayLoadingTimer.value && delayLoadingTimer.value()
+  }
+
   const _run = (args: any) => {
+    clearTimerAll()
+
     loading.value = !isLoadingDelay()
     delayLoadingTimer.value = checkDelayLoading()
 
