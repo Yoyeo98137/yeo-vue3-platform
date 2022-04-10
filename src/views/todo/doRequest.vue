@@ -54,13 +54,14 @@ const getDataApi = (count: number = 0, name: string) => {
 // ? 这样重新定义参数字段接收的方式，能否保证调用函数时正确的 ts 类型推断 ?
 
 // 自动请求
-const { loading: baseLoading, data: baseData } = useRequest(getDataApi, {
+const { loading: baseLoading, data: baseData, run: isAutoSelfRun } = useRequest(getDataApi, {
   defaultParams: [99, "yeo"]
 })
 // 手动请求
 let handleCount = 1
 const { loading: manualLoading, data: manualData, run: runRequest } = useRequest(getDataApi, { manual: true })
 const handleRequest = () => {
+  // isAutoSelfRun(handleCount++, "yeo")
   runRequest(handleCount++, "yeo")
 }
 

@@ -20,7 +20,9 @@ interface PropsRequestOptions {
  * useRequest
  * 
  * - [x] 自动请求/手动请求（兼容带参函数的正常调用）
- * - [ ] loading delay
+ * - [x] loading delay
+ * - [ ] 重新加载（reload），这类似于再手动触发一下请求，但是从语义化，或者是参数不变的情况下，reload 是更匹配当前场景的
+ * - [ ] 泛型推断
  * - [ ] ...
  * 
  * todo types.
@@ -37,6 +39,13 @@ export function useRequest<TRequset, TParams>(service: any, options?: PropsReque
   const data = ref()
   const delayLoadingTimer = ref()
 
+  // 可以再封装一层函数
+  // 这里的 options 是非必填的，然后加层的函数里面则保证一个默认值 空对象
+  // 这样就可以对其进行解构了
+  // return useRequestImplement<TRequset, TParams>(service, options);
+  // const { manual = false } = options
+
+  // todo 怎样可以通过结构的形式，同时又保证 ts 的正常推断
   /** 是否开启手动请求开关 */
   const isManualRun = () => options?.manual
   /** 是否开启延迟加载 */
@@ -67,7 +76,9 @@ export function useRequest<TRequset, TParams>(service: any, options?: PropsReque
   }
   // *手动请求
   const run = (...args: any) => {
-    isManualRun() && _run(args)
+    // isManualRun() && _run(args)
+    // manual 的用意应该是 静止自动发起请求，而不是跟 run 回调捆绑的关系
+    _run(args)
   }
   // *自动请求
   onMounted(() => {
