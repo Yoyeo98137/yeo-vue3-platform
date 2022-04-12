@@ -39,12 +39,14 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 - [x] 数据响应式
 - [x] 自动请求/手动请求（兼容带参函数）
 - [x] loading delay（有效防止闪烁）
+- [x] 参数 泛型推断
 - [ ] 基于场景延伸（高级 hook）
 - [ ] ...
 
 **场景**
 
-- [ ] 分页 usePagination
+- [x] 分页 usePagination
+- [x] 表格 useTable
 - [ ] ...
 
 > https://github.com/vercel/swr  
