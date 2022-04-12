@@ -1,10 +1,5 @@
-/*
- * @Description: hooks 通用类型定义
- * @Author: yeo
- * @Date: 2022-04-11 09:30:19
- * @LastEditors: yeo
- * @LastEditTime: 2022-04-11 09:36:32
- */
+
+// hooks 通用类型定义
 
 import { Ref } from "vue"
 
