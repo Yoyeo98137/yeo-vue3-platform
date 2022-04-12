@@ -1,0 +1,3 @@
+export const isFunction = (type: any) => {
+  // todo...
+}
