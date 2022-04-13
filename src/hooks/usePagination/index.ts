@@ -35,8 +35,8 @@ export function usePagination<TData, TParams extends unknown[]>(
     bindPagination.page = page
     bindPagination.pageSize = bindPagination.limit = pageSize
 
-    // todo 这里的类型推断有问题
     runPagination(
+      // todo 这里的类型推断有问题
       /* @ts-ignore */
       merge(
         {
@@ -44,8 +44,7 @@ export function usePagination<TData, TParams extends unknown[]>(
           limit: bindPagination.limit,
         },
         // 合并 分页之外 的参数
-        /* @ts-ignore */
-        ...restOptions.defaultParams
+        ...((restOptions.defaultParams ?? []) as any[])
       )
     )
   }
@@ -87,8 +86,7 @@ export function usePagination<TData, TParams extends unknown[]>(
     bindPagination.total = totalCount
   }
 
-  options = options || {}
-  const { ...restOptions } = options
+  const { ...restOptions } = options ?? {}
   // *Merge options
   const finallyOptions = merge(
     {

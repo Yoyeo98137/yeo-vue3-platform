@@ -13,7 +13,9 @@ interface ResultTable<TData, TParams extends unknown[]>
   extends ResultPagination<TData, TParams> {
   list: Ref<any[]>
   /** 刷新表格（刷新分页） */
-  reload: () => void
+  reload: (...arg: TParams) => void
+  // reload: (...arg: TParams) => Promise<TData | null>
+  // reload: () => void
 }
 
 /**
@@ -34,8 +36,7 @@ export function useTable<TData, TParams extends unknown[]>(
   service: Service<TData, TParams>,
   options?: OptionsTable<TData, TParams>
 ) {
-  // Init options
-  options = options || {}
+  const { reRender } = options ?? {}
 
   // Set request
   const {
@@ -44,7 +45,7 @@ export function useTable<TData, TParams extends unknown[]>(
 
     // 保留剩余的导出，再提供出去
     ...rest
-  } = usePagination(service, options)
+  } = usePagination(service, options!)
 
   // Init/Update table-list
   const list: Ref<any[]> = computed(() => {
@@ -57,11 +58,11 @@ export function useTable<TData, TParams extends unknown[]>(
       const { result = [] } = info
 
       // 重新处理数据格式
-      if (options?.reRender && isFunction(options.reRender)) {
+      if (isFunction(reRender)) {
         res = result.map((ele: any, index: any) =>
           // todo
           /* @ts-ignore */
-          options.reRender(ele, index)
+          reRender(ele, index)
         )
       } else res = result
     }
@@ -69,7 +70,8 @@ export function useTable<TData, TParams extends unknown[]>(
     return res
   })
 
-  const reload = () => {
+  const reload = (...arg: TParams) => {
+    console.log('🏄 # reload # arg', arg)
     pagination.initPagination()
   }
 
