@@ -34,9 +34,10 @@ export interface Options<TData, TParams extends any[]> {
   /** 通过设置延迟的毫秒数，可以延迟 loading 变成 true 的时间，有效防止闪烁。 */
   loadingDelay?: number
 
-  onBefore?: (params: TParams) => void
-  onSuccess?: (data: TData, params: TParams) => void
-  // and More...
+  onBefore?: (params?: TParams) => void
+  onSuccess?: (data?: TData, params?: TParams) => void
+  onError?: () => void
+  onFinally?: () => void
 
   // [key: string]: any;
 }
@@ -59,4 +60,5 @@ export interface PropPaginationPlus extends TablePageVal {
 export interface ResultPagination<TData, TParams extends unknown[]>
   extends RequestResult<TData, TParams> {
   pagination: PropPaginationPlus
+  reQuery: (...args: TParams) => void
 }
