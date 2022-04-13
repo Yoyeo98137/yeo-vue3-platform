@@ -2,3 +2,5 @@
 
 export * from "./useSWR"
 export * from "./useRequest"
+export * from "./usePagination"
+export * from "./useTable"
