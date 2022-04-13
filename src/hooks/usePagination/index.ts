@@ -30,13 +30,8 @@ export function usePagination<TData, TParams extends unknown[]>(
   service: Service<TData, TParams>,
   options?: Options<TData, TParams>
 ) {
-  /** 设置分页，发出新请求 */
-  const setPagination = (page: number, pageSize: number) => {
-    bindPagination.page = page
-    bindPagination.pageSize = bindPagination.limit = pageSize
-
+  const mergePaginationParams = (...args: TParams) => {
     runPagination(
-      // todo 这里的类型推断有问题
       /* @ts-ignore */
       merge(
         {
@@ -44,10 +39,26 @@ export function usePagination<TData, TParams extends unknown[]>(
           limit: bindPagination.limit,
         },
         // 合并 分页之外 的参数
-        ...((restOptions.defaultParams ?? []) as any[])
+        ...((args ?? []) as any[])
       )
     )
   }
+  /** 设置分页，发出新请求 */
+  const setPagination = (page: number, pageSize: number) => {
+    bindPagination.page = page
+    bindPagination.pageSize = bindPagination.limit = pageSize
+
+    // Merge Params
+    mergePaginationParams(...(restOptions.defaultParams ?? []) as TParams)
+  }
+  // todo
+  /** 暂时作为手动执行的 参数补充方式 */
+  const queryPagination = (...args: TParams) => {
+    console.log('🏄 # queryPagination # args', args)
+    // Merge Params
+    mergePaginationParams(...args)
+  }
+
   /** 重置分页 */
   const initPagination = () => {
     setPagination(1, 10)
@@ -112,6 +123,7 @@ export function usePagination<TData, TParams extends unknown[]>(
 
   return {
     pagination: bindPagination,
+    reQuery: queryPagination,
     ...rest,
   }
 }

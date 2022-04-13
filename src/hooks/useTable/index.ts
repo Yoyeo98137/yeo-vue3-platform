@@ -42,6 +42,7 @@ export function useTable<TData, TParams extends unknown[]>(
   const {
     data,
     pagination,
+    reQuery,
 
     // 保留剩余的导出，再提供出去
     ...rest
@@ -79,6 +80,7 @@ export function useTable<TData, TParams extends unknown[]>(
     list,
     pagination,
     reload,
+    reQuery,
 
     ...rest,
   }

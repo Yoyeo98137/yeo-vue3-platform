@@ -6,32 +6,35 @@
       <p>{{ baseData?.message || "--" }}</p>
     </ElCard>
 
-    <ElButton
-      type="primary"
-      size="large"
-      :disabled="manualLoading"
-      @click="handleRequest"
-    >handle runRequest</ElButton>
+    <ElButton type="primary" size="large" :disabled="manualLoading" @click="handleRequest">handle runRequest</ElButton>
     <ElCard v-loading="manualLoading" class="do-card">
       <p>{{ manualData?.message || "--" }}</p>
     </ElCard>
 
-    <ElButton
-      type="primary"
-      size="large"
-      :disabled="nmllDelayLoading"
-      @click="handleDelayTestRun"
-    >handle delayRequest</ElButton>
+    <ElButton type="primary" size="large" :disabled="nmllDelayLoading" @click="handleDelayTestRun">handle delayRequest
+    </ElButton>
     <ElCard class="do-card">
       <p v-loading="nmllDelayLoading">NO Delay: {{ nmllDelayData || "--" }}</p>
       <p v-loading="delayLoading">OPEN Delay: {{ delayData || "--" }}</p>
+    </ElCard>
+
+    <!--  -->
+
+    <p>Test to VarParams.</p>
+
+    <ElButton type="primary" size="large" :disabled="varsLoading" @click="handleVarsParams">handle delayRequest
+    </ElButton>
+    <ElCard v-loading="varsLoading" class="do-card">
+      <p>Vars Params: {{ varsData?.date || "--" }}</p>
+      <p>Vars Params: {{ varsData?.varsMsg || "--" }}</p>
     </ElCard>
   </ElMain>
 </template>
 
 <script lang="ts" setup>
-import { watch } from 'vue';
-import { useRequest } from '@/hooks';
+import { ref } from 'vue';
+// import { watch, onMounted, ref, reactive } from 'vue';
+import { usePagination, useRequest } from '@/hooks';
 
 // *Axios - Demo
 const getDataApi = (count: number = 0, name: string) => {
@@ -88,6 +91,32 @@ const { loading: delayLoading, data: delayData, run: delayRun } = useRequest(get
 const handleDelayTestRun = () => {
   nmlDelayRun()
   delayRun()
+}
+
+const getNowTimerVars = (params: { msg: string }) => {
+  console.log('🏄 # getNowTimerVars # params', params)
+
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({
+        date: new Date().getTime(),
+        varsMsg: params.msg
+      });
+    }, 500);
+  });
+}
+const varsToMsg = ref("")
+const {
+  loading: varsLoading,
+  pagination: varsPagination,
+  data: varsData,
+  reQuery: varsReQuery
+} = usePagination(getNowTimerVars, {
+  defaultParams: [{ msg: "" }]
+})
+const handleVarsParams = () => {
+  varsToMsg.value = "Is over msg Update!"
+  varsReQuery({ msg: varsToMsg.value })
 }
 
 </script>

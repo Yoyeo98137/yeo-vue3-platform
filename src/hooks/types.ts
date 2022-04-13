@@ -60,5 +60,8 @@ export interface PropPaginationPlus extends TablePageVal {
 export interface ResultPagination<TData, TParams extends unknown[]>
   extends RequestResult<TData, TParams> {
   pagination: PropPaginationPlus
+
+  // todo
+  /** 暂时作为向外提供的手动执行函数 */
   reQuery: (...args: TParams) => void
 }

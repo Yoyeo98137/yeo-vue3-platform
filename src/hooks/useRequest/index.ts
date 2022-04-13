@@ -9,6 +9,7 @@ import { Service, Options, RequestResult } from "../types"
  * - [x] 继承请求体入参类型推断 
  * - [x] 泛型推断
  * - [x] 安全解构
+ * - [ ] 动态参数（尤其是手动执行场景下）
  * - [ ] 重新加载（reload），这类似于再手动触发一下请求，但是从语义化，或者是参数不变的情况下，reload 是更匹配当前场景的
  * - [ ] 放置回调钩子（before、success、finally...）
  * - [ ] 应该自带 节流 能力
