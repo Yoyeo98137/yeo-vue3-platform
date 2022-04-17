@@ -33,6 +33,8 @@ export interface Options<TData, TParams extends any[]> {
   defaultParams?: TParams
   /** 通过设置延迟的毫秒数，可以延迟 loading 变成 true 的时间，有效防止闪烁。 */
   loadingDelay?: number
+  /** 请求等待依赖，当其值为 false 时，请求永远都不会发出 */
+  ready?: Ref<Boolean>
 
   onBefore?: (params?: TParams) => void
   onSuccess?: (data?: TData, params?: TParams) => void
