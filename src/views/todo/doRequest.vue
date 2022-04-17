@@ -115,6 +115,7 @@ const {
   defaultParams: [{ msg: "" }]
 })
 const handleVarsParams = () => {
+  console.log('🏄 # handleVarsParams # varsPagination', varsPagination)
   varsToMsg.value = "Is over msg Update!"
   varsReQuery({ msg: varsToMsg.value })
 }

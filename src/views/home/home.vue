@@ -5,6 +5,7 @@
   <ElButton type="primary" size="large" @click="jumpToAbout">Go to /About</ElButton>
   <ElButton type="primary" size="large" @click="jumpToTestSWR">Go to /TestSWR</ElButton>
   <ElButton type="primary" size="large" @click="jumpToTestRequest">Go to /TestRequest</ElButton>
+  <ElButton type="primary" size="large" @click="jumpToMoreRequest">Go to /MoreRequest</ElButton>
 
   <div style="margin-top: 16px;">
     <p>{{ "modelCascader - " + modelCascader }}</p>
@@ -71,6 +72,11 @@ const jumpToTestSWR = () => {
 const jumpToTestRequest = () => {
   router.push({
     name: 'doRequest',
+  })
+}
+const jumpToMoreRequest = () => {
+  router.push({
+    name: 'moreRequest',
   })
 }
 
