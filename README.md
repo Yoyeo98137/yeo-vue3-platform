@@ -40,6 +40,8 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 - [x] 自动请求/手动请求（兼容带参函数）
 - [x] loading delay（有效防止闪烁）
 - [x] 参数 泛型推断
+- [x] 钩子回调
+- [x] 依赖请求 Ready
 - [ ] 基于场景延伸（高级 hook）
 - [ ] ...
 
