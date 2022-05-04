@@ -4,7 +4,6 @@
   <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
   <ElButton type="primary" size="large" @click="jumpToAbout">Go to /About</ElButton>
   <ElButton type="primary" size="large" @click="jumpToTestSWR">Go to /TestSWR</ElButton>
-  <ElButton type="primary" size="large" @click="jumpToTestRequest">Go to /TestRequest</ElButton>
   <ElButton type="primary" size="large" @click="jumpToMoreRequest">Go to /MoreRequest</ElButton>
 
   <div style="margin-top: 16px;">
@@ -67,11 +66,6 @@ const jumpToAbout = () => {
 const jumpToTestSWR = () => {
   router.push({
     name: 'demo',
-  })
-}
-const jumpToTestRequest = () => {
-  router.push({
-    name: 'doRequest',
   })
 }
 const jumpToMoreRequest = () => {
