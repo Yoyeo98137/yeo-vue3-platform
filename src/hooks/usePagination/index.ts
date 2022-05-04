@@ -51,18 +51,11 @@ export function usePagination<TData, TParams extends unknown[]>(
     // Merge Params
     mergePaginationParams(...(restOptions.defaultParams ?? []) as TParams)
   }
-  // todo
-  /** 暂时作为手动执行的 参数补充方式 */
-  const queryPagination = (...args: TParams) => {
-    console.log('🏄 # queryPagination # args', args)
-    // Merge Params
-    mergePaginationParams(...args)
-  }
-
   /** 重置分页 */
-  const initPagination = () => {
+  const reloadPagination = () => {
     setPagination(1, 10)
   }
+
   /** 收到分页切换回调 */
   const updatePagination = (pageInfo: TablePageVal) => {
     const { page, pageSize } = pageInfo
@@ -79,10 +72,8 @@ export function usePagination<TData, TParams extends unknown[]>(
   const bindPagination: PropPaginationPlus = reactive({
     page: 1,
     pageSize: 10,
-    total: 0,
     limit: 10,
-
-    initPagination,
+    total: 0,
     updatePagination,
   })
 
@@ -123,7 +114,7 @@ export function usePagination<TData, TParams extends unknown[]>(
 
   return {
     pagination: bindPagination,
-    reQuery: queryPagination,
+    reLoad: reloadPagination,
     ...rest,
   }
 }

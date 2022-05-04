@@ -56,14 +56,12 @@ export interface RequestResult<TData, TParams extends unknown[]> {
 }
 
 export interface PropPaginationPlus extends TablePageVal {
-  initPagination: () => void
   updatePagination: (pageInfo: TablePageVal) => void
 }
 export interface ResultPagination<TData, TParams extends unknown[]>
   extends RequestResult<TData, TParams> {
   pagination: PropPaginationPlus
 
-  // todo
-  /** 暂时作为向外提供的手动执行函数 */
-  reQuery: (...args: TParams) => void
+  /** 重新发起一次 分页的请求，相当于分页的手动 run */
+  reLoad: () => void
 }

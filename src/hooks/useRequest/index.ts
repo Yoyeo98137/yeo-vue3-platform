@@ -1,5 +1,7 @@
-import { onMounted, ref, watch } from "vue"
+import { isRef, onMounted, ref, watch } from "vue"
 import { Service, Options, RequestResult } from "../types"
+import { isObject } from "@/utils/ifType"
+import deepClone from "@/utils/lodash/clone"
 
 /**
  * *useRequest*
@@ -16,31 +18,21 @@ import { Service, Options, RequestResult } from "../types"
  *        - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
  *        - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
  * - [ ] 依赖刷新（see: https://www.attojs.com/guide/documentation/refreshDeps.html）
- * - [ ] 动态参数（尤其是手动执行场景下）
- * - [ ] 重新加载（reload、refresh），这类似于再手动触发一下请求，但是从语义化，或者是参数不变的情况下，reload 是更匹配当前场景的
+ * - [x] 响应式参数参数（理论上来说，useRequest 本身用不到响应式参数的场景，主要是用来服务场景钩子）
  * - [x] 放置回调钩子（before、success、finally...）
  * - [ ] 应该自带 节流 能力
  * - [ ] ...
- * 
- * *自动执行的更多能力*
- * - [ ] 数据自制化（reRender）比如表格，需要在拿到响应数据后再修改一下字段结构
- * - [ ] 刷新，以原本相同的参数重新发起请求，重新渲染数据（reload）
- * - [ ] init、reload、run 之间的联系
- * 
- * 把这个 _run 或者说 service 抽离出去，方便后面提供给场景 hooks
- * 
- * todo types.
  */
-export function useRequest<TRequset, TParams extends unknown[]>(
-  service: Service<TRequset, TParams>
-): RequestResult<TRequset, TParams>;
-export function useRequest<TRequset, TParams extends unknown[]>(
-  service: Service<TRequset, TParams>,
-  options: Options<TRequset, TParams>
-): RequestResult<TRequset, TParams>;
-export function useRequest<TRequset, TParams extends unknown[]>(
-  service: Service<TRequset, TParams>,
-  options?: Options<TRequset, TParams>
+export function useRequest<TData, TParams extends unknown[]>(
+  service: Service<TData, TParams>
+): RequestResult<TData, TParams>;
+export function useRequest<TData, TParams extends unknown[]>(
+  service: Service<TData, TParams>,
+  options: Options<TData, TParams>
+): RequestResult<TData, TParams>;
+export function useRequest<TData, TParams extends unknown[]>(
+  service: Service<TData, TParams>,
+  options?: Options<TData, TParams>
 ) {
 
   const loading = ref(false)
@@ -66,6 +58,28 @@ export function useRequest<TRequset, TParams extends unknown[]>(
   /** 统一清理定时器 */
   const clearTimerAll = () => {
     delayLoadingTimer.value && delayLoadingTimer.value()
+  }
+  /** 识别存在的 响应式参数，然后重新赋值 */
+  const reVarReactiveParams = (targetArgs: any) => {
+    // Deep clone.
+    const cloneTarget = deepClone(targetArgs)
+
+    const reactiveInParams = cloneTarget.map((pms: any) => {
+      // todo
+      // 目前只兼容了单层对象
+      if (isObject(pms)) {
+        for (const key in pms) {
+          // 识别响应式参数值
+          if (isRef(pms[key])) pms[key] = pms[key].value
+        }
+      }
+      // 单层数组、以及其他的基本类型
+      if (isRef(pms)) pms = pms.value
+
+      return pms
+    })
+
+    return reactiveInParams
   }
 
   /** 记录等待依赖参数 */
@@ -118,12 +132,12 @@ export function useRequest<TRequset, TParams extends unknown[]>(
   const run = (...args: TParams) => {
     // manual && _run(args)
     // ? manual 的用意应该是 静止自动发起请求，而不是跟 run 回调捆绑的关系
-    _run(args)
+    _run(reVarReactiveParams(args) as TParams)
   }
   // *自动请求
   onMounted(() => {
     if (manual) return
-    _run(defaultParams as TParams)
+    _run(reVarReactiveParams(defaultParams) as TParams)
   })
 
   // *监听等待依赖变化，然后重新发起请求

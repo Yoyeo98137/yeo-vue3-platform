@@ -12,18 +12,11 @@ interface OptionsTable<TData, TParams extends unknown[]>
 interface ResultTable<TData, TParams extends unknown[]>
   extends ResultPagination<TData, TParams> {
   list: Ref<any[]>
-  /** 刷新表格（刷新分页） */
-  reload: (...arg: TParams) => void
-  // reload: (...arg: TParams) => Promise<TData | null>
-  // reload: () => void
 }
 
 /**
  * useTable
  * @description 通用表格、集成分页 请求
- * todo
- * - not run, Is reload
- * - types...
  */
 export function useTable<TData, TParams extends unknown[]>(
   service: Service<TData, TParams>
@@ -41,9 +34,6 @@ export function useTable<TData, TParams extends unknown[]>(
   // Set request
   const {
     data,
-    pagination,
-    reQuery,
-
     // 保留剩余的导出，再提供出去
     ...rest
   } = usePagination(service, options!)
@@ -71,17 +61,9 @@ export function useTable<TData, TParams extends unknown[]>(
     return res
   })
 
-  const reload = (...arg: TParams) => {
-    console.log('🏄 # reload # arg', arg)
-    pagination.initPagination()
-  }
 
   return {
     list,
-    pagination,
-    reload,
-    reQuery,
-
     ...rest,
   }
 }
