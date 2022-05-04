@@ -1,0 +1,56 @@
+<template>
+  <ElMain>
+    <p>分页 Hooks - usePagination</p>
+
+    <ElInput v-model="testReactive" style="width: 626px;" />
+    <ElPagination v-model:currentPage="pagination.page" v-model:pageSize="pagination.pageSize"
+      :pageSizes="[10, 20, 30, 40]" :disabled="paginationLoading" layout="total, sizes, prev, pager, next"
+      :total="testTotal" @sizeChange="handleChangePagination" @currentChange="handleChangePagination" />
+    <ElButton type="primary" size="large" :loading="paginationLoading" @click="handleSearch">查询</ElButton>
+    <ElButton type="primary" size="large" :loading="paginationLoading" @click="handleReload">重置</ElButton>
+  </ElMain>
+</template>
+
+<script lang="ts" setup>
+import { ref } from 'vue';
+import { usePagination } from '@/hooks';
+
+const testReactive = ref("")
+const testTotal = ref(50)
+
+const getCurTimer = (params: any) => {
+  console.log('🏄 # 输出参数 # params', params)
+
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(new Date().getTime());
+    }, 500);
+  });
+}
+const { loading: paginationLoading, pagination, reLoad } = usePagination(getCurTimer, {
+  defaultParams: [{
+    inputValue: testReactive
+  }]
+})
+const handleChangePagination = (model: any) => {
+  console.log('🏄 # handleChangePagination # model', model)
+  console.log('🏄 # handleChangePagination # pagination', pagination)
+
+  handleSearch()
+}
+const handleSearch = () => {
+  pagination.updatePagination({
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+    total: testTotal.value
+  })
+}
+const handleReload = () => {
+  testReactive.value = ""
+  reLoad()
+}
+</script>
+
+<style>
+/*  */
+</style>

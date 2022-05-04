@@ -42,7 +42,9 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 - [x] 参数 泛型推断
 - [x] 钩子回调
 - [x] 依赖请求 Ready
-- [ ] 基于场景延伸（高级 hook）
+- [x] 兼容响应式参数
+- [x] 基于场景延伸（高级 hook）
+- [ ] 文档、用例整理，md 文件转换
 - [ ] ...
 
 **场景**

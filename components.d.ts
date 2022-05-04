@@ -7,7 +7,9 @@ declare module 'vue' {
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCascader: typeof import('element-plus/es')['ElCascader']
+    ElInput: typeof import('element-plus/es')['ElInput']
     ElMain: typeof import('element-plus/es')['ElMain']
+    ElPagination: typeof import('element-plus/es')['ElPagination']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Loading: typeof import('element-plus/es')['ElLoadingDirective']
   }
