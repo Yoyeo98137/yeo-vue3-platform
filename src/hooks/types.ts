@@ -31,10 +31,17 @@ export interface Options<TData, TParams extends any[]> {
   manual?: boolean
   /** 接收发起自动请求时需要携带的参数 */
   defaultParams?: TParams
+  /** 依赖刷新数组 */
+  refreshDeps?: any[]
   /** 通过设置延迟的毫秒数，可以延迟 loading 变成 true 的时间，有效防止闪烁。 */
   loadingDelay?: number
   /** 请求等待依赖，当其值为 false 时，请求永远都不会发出 */
   ready?: Ref<Boolean>
+
+  /** 节流 delay 时间 */
+  throttleInterval?: number
+  /** 防抖 wait 时间 */
+  debounceInterval?: number
 
   onBefore?: (params?: TParams) => void
   onSuccess?: (data?: TData, params?: TParams) => void
@@ -53,6 +60,9 @@ export interface RequestResult<TData, TParams extends unknown[]> {
   // run: (...arg: TParams) => void
   // ?需要提供 .then 之类的回调吗
   run: (...arg: TParams) => Promise<TData | null>
+
+  // 重新请求
+  refresh: () => void
 }
 
 export interface PropPaginationPlus extends TablePageVal {
@@ -63,5 +73,5 @@ export interface ResultPagination<TData, TParams extends unknown[]>
   pagination: PropPaginationPlus
 
   /** 重新发起一次 分页的请求，相当于分页的手动 run */
-  reLoad: () => void
+  reload: () => void
 }

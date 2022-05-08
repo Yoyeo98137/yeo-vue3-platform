@@ -1,7 +1,9 @@
 import { isRef, onMounted, ref, watch } from "vue"
 import { Service, Options, RequestResult } from "../types"
-import { isObject } from "@/utils/ifType"
+import { isNull, isObject } from "@/utils/ifType"
 import deepClone from "@/utils/lodash/clone"
+import debounce from "@/utils/lodash/debounce"
+import throttle from "@/utils/lodash/throttle"
 
 /**
  * *useRequest*
@@ -17,10 +19,11 @@ import deepClone from "@/utils/lodash/clone"
  *        - 当 manual=false 自动请求模式时，每次 ready 从 false 变为 true 时，都会自动发起请求，会带上参数 options.defaultParams。
  *        - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
  *        - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
- * - [ ] 依赖刷新（see: https://www.attojs.com/guide/documentation/refreshDeps.html）
+ * - [x] 重新发起请求 refresh
+ * - [x] 依赖刷新 refreshDeps（see: https://www.attojs.com/guide/documentation/refreshDeps.html）
  * - [x] 响应式参数参数（理论上来说，useRequest 本身用不到响应式参数的场景，主要是用来服务场景钩子）
  * - [x] 放置回调钩子（before、success、finally...）
- * - [ ] 应该自带 节流 能力
+ * - [x] 节流、防抖选项
  * - [ ] ...
  */
 export function useRequest<TData, TParams extends unknown[]>(
@@ -47,8 +50,12 @@ export function useRequest<TData, TParams extends unknown[]>(
   const {
     manual,
     defaultParams = [],
+    refreshDeps = [],
     loadingDelay,
     ready = ref(true),
+    throttleInterval = null,
+    debounceInterval = null,
+
     onBefore,
     onSuccess,
     onError,
@@ -128,17 +135,55 @@ export function useRequest<TData, TParams extends unknown[]>(
         onFinally?.()
       })
   }
+
+  /** 统一限制节流防抖的执行 */
+  const waitRunCenter = (args: TParams) => {
+    if (debouncedRun) {
+      /* @ts-ignore */
+      return debouncedRun(reVarReactiveParams(args))
+    }
+
+    if (throttledRun) {
+      /* @ts-ignore */
+      return throttledRun(reVarReactiveParams(args))
+    }
+
+    return _run(reVarReactiveParams(args))
+  }
+
   // *手动请求
   const run = (...args: TParams) => {
     // manual && _run(args)
     // ? manual 的用意应该是 静止自动发起请求，而不是跟 run 回调捆绑的关系
-    _run(reVarReactiveParams(args) as TParams)
+    waitRunCenter(args)
   }
   // *自动请求
   onMounted(() => {
     if (manual) return
-    _run(reVarReactiveParams(defaultParams) as TParams)
+    waitRunCenter(defaultParams as TParams)
   })
+
+  // *定义防抖/节流函数载体
+  const debouncedRun =
+    !isNull(debounceInterval) &&
+    debounce(_run);
+  const throttledRun =
+    !isNull(throttleInterval) &&
+    throttle(_run);
+
+  // *携带默认参数，重新发起请求
+  const refresh = () => {
+    waitRunCenter(defaultParams as TParams)
+  }
+
+  // *依赖刷新，相当于基于 watch 监听响应式对象的语法糖
+  if (refreshDeps.length) {
+    // 如果监听的是 ref - [ref1, ref2...]
+    // 如果监听的是 reactive 中的某个字段 - [() => reactive.xx1, () => reactive.xx2...]
+    watch(refreshDeps, () => {
+      refresh()
+    })
+  }
 
   // *监听等待依赖变化，然后重新发起请求
   watch(ready, (val => {
@@ -168,6 +213,7 @@ export function useRequest<TData, TParams extends unknown[]>(
     loading,
     error,
     data,
-    run
+    run,
+    refresh
   }
 }
