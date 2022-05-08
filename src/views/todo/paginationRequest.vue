@@ -27,7 +27,7 @@ const getCurTimer = (params: any) => {
     }, 500);
   });
 }
-const { loading: paginationLoading, pagination, reLoad } = usePagination(getCurTimer, {
+const { loading: paginationLoading, pagination, reload } = usePagination(getCurTimer, {
   defaultParams: [{
     inputValue: testReactive
   }]
@@ -47,8 +47,9 @@ const handleSearch = () => {
 }
 const handleReload = () => {
   testReactive.value = ""
-  reLoad()
+  reload()
 }
+
 </script>
 
 <style>

@@ -114,7 +114,7 @@ export function usePagination<TData, TParams extends unknown[]>(
 
   return {
     pagination: bindPagination,
-    reLoad: reloadPagination,
+    reload: reloadPagination,
     ...rest,
   }
 }
