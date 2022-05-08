@@ -11,6 +11,13 @@
       <p>Ready Data: {{ readyData || "--" }}</p>
       <p>Now is Ready? {{ isReadyNow }}</p>
     </ElCard>
+
+    <p>测试请求 hooks - refreshDeps.</p>
+
+    <ElInput v-model="testRefreshDepsVal" style="width: 412px;" clearable />
+    <ElCard v-loading="rfsDepsLoading" class="do-card">
+      <p>RefreshDeps Data: {{ rfsDepsData || "--" }}</p>
+    </ElCard>
   </ElMain>
 </template>
 
@@ -18,6 +25,7 @@
 import { ref } from 'vue';
 import { useRequest } from '@/hooks';
 
+// Ready
 const isReadyNow = ref(false)
 const getNowTimer = () => {
   return new Promise(resolve => {
@@ -36,6 +44,20 @@ const handleReadyEv = () => {
 const handleManualReadyEv = () => {
   readyRun()
 }
+
+// RefreshDeps
+const testRefreshDepsVal = ref("")
+const getNowTimerRefreshDeps = () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(new Date().getTime());
+    }, 500);
+  });
+}
+const { loading: rfsDepsLoading, data: rfsDepsData } = useRequest(getNowTimerRefreshDeps, {
+  refreshDeps: [testRefreshDepsVal],
+  debounceInterval: 600
+})
 
 </script>
 
