@@ -13,16 +13,16 @@ import throttle from "@/utils/lodash/throttle"
  * - [x] 继承请求体入参类型推断 
  * - [x] 泛型推断
  * - [x] 安全解构
+ * - [x] 回调钩子（before、success、finally...）
  * - [x] ready
  *        等待执行（所谓等待，应该是期望在请求发起之前，先暂停一会，等待某个执行完毕 即返回 true）
  *        两个场景：
  *        - 当 manual=false 自动请求模式时，每次 ready 从 false 变为 true 时，都会自动发起请求，会带上参数 options.defaultParams。
  *        - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
  *        - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
+ * - [x] 兼容响应式参数
  * - [x] 重新发起请求 refresh
  * - [x] 依赖刷新 refreshDeps（see: https://www.attojs.com/guide/documentation/refreshDeps.html）
- * - [x] 响应式参数参数（理论上来说，useRequest 本身用不到响应式参数的场景，主要是用来服务场景钩子）
- * - [x] 放置回调钩子（before、success、finally...）
  * - [x] 节流、防抖选项
  * - [ ] ...
  */

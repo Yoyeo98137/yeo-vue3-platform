@@ -41,8 +41,11 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 - [x] loading delay（有效防止闪烁）
 - [x] 参数 泛型推断
 - [x] 钩子回调
-- [x] 依赖请求 Ready
+- [x] 依赖请求 ready
 - [x] 兼容响应式参数
+- [x] 重新发起请求 refresh
+- [x] 依赖刷新 refreshDeps
+- [x] 节流、防抖选项（throttleInterval、debounceInterval）
 - [x] 基于场景延伸（高级 hook）
 - [ ] 文档、用例整理，md 文件转换
 - [ ] ...
