@@ -66,7 +66,12 @@ export function useRequest<TData, TParams extends unknown[]>(
   const clearTimerAll = () => {
     delayLoadingTimer.value && delayLoadingTimer.value()
   }
-  /** 识别存在的 响应式参数，然后重新赋值 */
+  /**
+   * 识别存在的 响应式参数，然后重新赋值
+   * - 如果是单独的 ref，直接赋值，不需要再 .value
+   * - 如果是 reactive 中的某个属性则通过计算属性转成 ref：computed(() => reactive.xxx)
+   * - 如果是字段比较多的 reactive 想配合解构使用：...toRefs(reactive)
+   */
   const reVarReactiveParams = (targetArgs: any) => {
     // Deep clone.
     const cloneTarget = deepClone(targetArgs)

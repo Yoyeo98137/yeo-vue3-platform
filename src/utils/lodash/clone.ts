@@ -25,7 +25,11 @@ const deepClone = (obj: any) => {
         // Object.getOwnPropertyDescriptor(a, "_value")
         // configurable
         // value
-        data[key] && (newObj[key] = data[key].value)
+
+        // 在拷贝过程中，保留响应式的引用来提供自定义操作可能性
+        // 而不去改变值的结构
+        data[key] && (newObj[key] = data[key])
+        // data[key] && (newObj[key] = data[key].value)
         continue
       }
 

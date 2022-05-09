@@ -2,7 +2,7 @@
   <ElMain>
     <p>分页 Hooks - usePagination</p>
 
-    <ElInput v-model="testReactive" style="width: 626px;" />
+    <ElInput v-model="testReactiveMore.inputVal" style="width: 626px;" />
     <ElPagination v-model:currentPage="pagination.page" v-model:pageSize="pagination.pageSize"
       :pageSizes="[10, 20, 30, 40]" :disabled="paginationLoading" layout="total, sizes, prev, pager, next"
       :total="testTotal" @sizeChange="handleChangePagination" @currentChange="handleChangePagination" />
@@ -12,9 +12,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { reactive, ref, toRefs } from 'vue';
 import { usePagination } from '@/hooks';
 
+const testReactiveMore = reactive({
+  inputVal: "",
+  val1: "",
+  val2: "",
+  val3: ""
+})
 const testReactive = ref("")
 const testTotal = ref(50)
 
@@ -29,7 +35,9 @@ const getCurTimer = (params: any) => {
 }
 const { loading: paginationLoading, pagination, reload } = usePagination(getCurTimer, {
   defaultParams: [{
-    inputValue: testReactive
+    // 展开响应式
+    ...toRefs(testReactiveMore)
+    // inputValue: testReactive
   }]
 })
 const handleChangePagination = (model: any) => {
@@ -46,7 +54,8 @@ const handleSearch = () => {
   })
 }
 const handleReload = () => {
-  testReactive.value = ""
+  testReactiveMore.inputVal = ""
+  // testReactive.value = ""
   reload()
 }
 
