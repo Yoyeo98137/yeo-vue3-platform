@@ -7,7 +7,7 @@
       :pageSizes="[10, 20, 30, 40]" :disabled="paginationLoading" layout="total, sizes, prev, pager, next"
       :total="testTotal" @sizeChange="handleChangePagination" @currentChange="handleChangePagination" />
     <ElButton type="primary" size="large" :loading="paginationLoading" @click="handleSearch">查询</ElButton>
-    <ElButton type="primary" size="large" :loading="paginationLoading" @click="handleReload">重置</ElButton>
+    <ElButton type="primary" size="large" :loading="paginationLoading" @click="handleRefresh">重置</ElButton>
   </ElMain>
 </template>
 
@@ -33,7 +33,7 @@ const getCurTimer = (params: any) => {
     }, 500);
   });
 }
-const { loading: paginationLoading, pagination, reload } = usePagination(getCurTimer, {
+const { loading: paginationLoading, pagination, refresh } = usePagination(getCurTimer, {
   defaultParams: [{
     // 展开响应式
     ...toRefs(testReactiveMore)
@@ -53,10 +53,10 @@ const handleSearch = () => {
     total: testTotal.value
   })
 }
-const handleReload = () => {
+const handleRefresh = () => {
   testReactiveMore.inputVal = ""
   // testReactive.value = ""
-  reload()
+  refresh()
 }
 
 </script>

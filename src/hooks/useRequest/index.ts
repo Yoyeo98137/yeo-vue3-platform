@@ -56,6 +56,8 @@ export function useRequest<TData, TParams extends unknown[]>(
     throttleInterval = null,
     debounceInterval = null,
 
+    paginationModel,
+
     onBefore,
     onSuccess,
     onError,
@@ -178,6 +180,14 @@ export function useRequest<TData, TParams extends unknown[]>(
 
   // *携带默认参数，重新发起请求
   const refresh = () => {
+    // _run 的时候会把请求发出的分页参数重置
+    // 但是不会触发绑定在页面组件的参数，因为两者的取值源头在这里并不一样
+    // 所以在识别到分页参数的时候，手动触发一下页面组件绑定的更新来避免视图更新异常
+    if (paginationModel) {
+      paginationModel.page = 1
+      paginationModel.pageSize = paginationModel.limit = 10
+    }
+
     waitRunCenter(defaultParams as TParams)
   }
 

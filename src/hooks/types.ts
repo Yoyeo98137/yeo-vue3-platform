@@ -43,6 +43,9 @@ export interface Options<TData, TParams extends any[]> {
   /** 防抖 wait 时间 */
   debounceInterval?: number
 
+  /** 分页参数载体，同于同步更新 DOM 中绑定的参数字段 */
+  paginationModel?: PropPaginationPlus
+
   onBefore?: (params?: TParams) => void
   onSuccess?: (data?: TData, params?: TParams) => void
   onError?: () => void
@@ -71,7 +74,4 @@ export interface PropPaginationPlus extends TablePageVal {
 export interface ResultPagination<TData, TParams extends unknown[]>
   extends RequestResult<TData, TParams> {
   pagination: PropPaginationPlus
-
-  /** 重新发起一次 分页的请求，相当于分页的手动 run */
-  reload: () => void
 }

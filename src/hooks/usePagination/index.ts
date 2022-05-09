@@ -13,11 +13,6 @@ import merge from "@/utils/lodash/merge"
 /**
  * usePagination
  * @description 通用分页、集成 useRequest
- * todo
- * - 参数相关的处理应该还有更合适的方法
- * - types...
- * - update (reload)
- * - setTotal
  */
 export function usePagination<TData, TParams extends unknown[]>(
   service: Service<TData, TParams>
@@ -50,10 +45,6 @@ export function usePagination<TData, TParams extends unknown[]>(
 
     // Merge Params
     mergePaginationParams(...(restOptions.defaultParams ?? []) as TParams)
-  }
-  /** 重置分页 */
-  const reloadPagination = () => {
-    setPagination(1, 10)
   }
 
   /** 收到分页切换回调 */
@@ -99,6 +90,7 @@ export function usePagination<TData, TParams extends unknown[]>(
           limit: 10,
         },
       ],
+      paginationModel: bindPagination,
       onSuccess: successPagination,
     },
     restOptions
@@ -114,7 +106,6 @@ export function usePagination<TData, TParams extends unknown[]>(
 
   return {
     pagination: bindPagination,
-    reload: reloadPagination,
     ...rest,
   }
 }
