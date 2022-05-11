@@ -69,6 +69,7 @@ export function useRequest<TData, TParams extends unknown[]>(
     delayLoadingTimer.value && delayLoadingTimer.value()
   }
   /**
+   * todo 这里的类型推断被 any 了
    * 识别存在的 响应式参数，然后重新赋值
    * - 如果是单独的 ref，直接赋值，不需要再 .value
    * - 如果是 reactive 中的某个属性则通过计算属性转成 ref：computed(() => reactive.xxx)
@@ -146,12 +147,10 @@ export function useRequest<TData, TParams extends unknown[]>(
   /** 统一限制节流防抖的执行 */
   const waitRunCenter = (args: TParams) => {
     if (debouncedRun) {
-      /* @ts-ignore */
       return debouncedRun(reVarReactiveParams(args))
     }
 
     if (throttledRun) {
-      /* @ts-ignore */
       return throttledRun(reVarReactiveParams(args))
     }
 
