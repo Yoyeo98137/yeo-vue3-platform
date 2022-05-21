@@ -7,27 +7,16 @@
   <ElButton type="primary" size="large" @click="jumpToMoreRequest">Go to /MoreRequest</ElButton>
   <ElButton type="primary" size="large" @click="jumpToPaginationRequest">Go to /PaginationRequest</ElButton>
 
+  <ElButton type="primary" size="large" @click="jumpToHttp">Go to /demoHttp</ElButton>
+
   <div style="margin-top: 16px;">
     <p>{{ "modelCascader - " + modelCascader }}</p>
     <div class="cascader-container">
-      <ElCascader
-        v-if="renderCascader"
-        v-model="modelCascader"
-        :options="optionsCascader"
-        :props="props"
-        :showAllLevels="false"
-        clearable
-        collapseTags
-        @change="onChangeCascaderr"
-      />
+      <ElCascader v-if="renderCascader" v-model="modelCascader" :options="optionsCascader" :props="props"
+        :showAllLevels="false" clearable collapseTags @change="onChangeCascaderr" />
       <!-- loading 占位 -->
-      <div
-        v-else
-        v-loading="true"
-        element-loading-text="Loading..."
-        element-loading-svg-view-box="-10, -10, 120, 120"
-        class="cascader-seat"
-      ></div>
+      <div v-else v-loading="true" element-loading-text="Loading..." element-loading-svg-view-box="-10, -10, 120, 120"
+        class="cascader-seat"></div>
     </div>
   </div>
 </template>
@@ -77,6 +66,11 @@ const jumpToMoreRequest = () => {
 const jumpToPaginationRequest = () => {
   router.push({
     name: 'paginationRequest',
+  })
+}
+const jumpToHttp = () => {
+  router.push({
+    name: 'demoHttp',
   })
 }
 
@@ -224,24 +218,29 @@ onMounted(async () => {
   width: 362px;
   height: 32px;
 }
+
 .el-cascader,
 .cascader-seat {
   width: 100%;
   height: 100%;
 }
+
 .cascader-seat {
   box-sizing: border-box;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   background-color: #ffffff;
 }
+
 .el-loading-spinner {
   display: flex;
   align-items: center;
 }
+
 .el-loading-spinner .path {
   stroke: #909399;
 }
+
 .el-loading-text {
   color: #909399 !important;
 }
