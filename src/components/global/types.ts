@@ -1,3 +1,5 @@
+import { TypeChildKey } from './chilldConfig';
+
 interface propOptions {
   label: string;
   value: string | number;
@@ -7,10 +9,10 @@ interface PropItemAttrs {
   label?: string;
   required?: boolean;
 }
-interface PropFormItem {
+export interface PropFormItem {
   // todo 插槽的时候或许不需要
   /** 指定要生成的表单控件，对应配置表的枚举 */
-  tag?: string;
+  tag?: TypeChildKey;
 
   /** 通过 v-bind 继承给 el-form-item 的属性以及事件 */
   attrs?: PropItemAttrs;
@@ -22,7 +24,7 @@ interface PropFormItem {
   isRender?: () => boolean;
 
   /**
-   * 列表数据项，应用于如 Checkbox、Radio、Select  
+   * 列表数据项，应用于如 Checkbox、Radio、Select
    * PS：[] | () => data | async () => await getData()
    */
   options?: Array<propOptions> | (() => Promise<any>);
