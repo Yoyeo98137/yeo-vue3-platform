@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, useAttrs } from 'vue';
-import { TypeItemConfig } from './types';
+import { onMounted, Ref, ref, shallowRef, useAttrs, watch } from 'vue';
+import { PropFormItem, TypeItemConfig } from './types';
 import { chilldConfig } from './chilldConfig';
 import deepClone from '@/utils/lodash/clone';
 
@@ -33,28 +33,65 @@ const props = withDefaults(defineProps<Props>(), {
 const attrs = useAttrs();
 console.log('🏄 # attrs', attrs);
 
+onMounted(() => {
+  console.log('🏄 # onMounted # props', props);
+  console.log('🏄 # onMounted # props', props.itemsConfig);
+
+  __renderFormItems.value = props.itemsConfig.map((el) => computeFormItem(el));
+  console.log(
+    '🏄 # onMounted # __renderFormItems.value',
+    __renderFormItems.value
+  );
+});
+
 const refYeoForm = ref('');
+// 处理渲染 el-form-item
+const __renderFormItems: Ref<TypeItemConfig> = shallowRef([]);
+// Vue received a Component which was made a reactive object.
+// This can lead to unnecessary performance overhead,
+// and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.
+// const __renderFormItems: Ref<TypeItemConfig> = ref([]);
 
 /** todo 计算绑定给组件的配置项 */
-// const computeFormItem = <T>(formItem: T) => {
-//   const item = deepClone(formItem)
+const computeFormItem = (formItem: PropFormItem) => {
+  const item = deepClone(formItem);
+  console.log('🏄 # computeFormItem # item', item);
 
-//   // 默认渲染输入框
-//   const tag = item.tag || "input"
-//   const basicItem = chilldConfig[tag]
+  // 默认渲染输入框
+  const tag = item.tag || 'input';
+  /** @ts-ignore */
+  const basicItem = chilldConfig[tag];
 
-//   if (!basicItem) throw new Error(`配置了不存在的组件类型 tag: ${tag}`)
-//   item.tag = basicItem.component
+  if (!basicItem) throw new Error(`配置了不存在的组件类型 tag: ${tag}`);
+  item.tag = basicItem.component;
 
-//   item.attrs = Object.assign(
-//     {},
-//     // 写入动态组件里面定义的 默认属性
-//     basicItem.baseAttrs,
-//     item.attrs,
-//   )
+  // 合并子表单项的 attrs
+  item.childAttrs = Object.assign(
+    {},
+    // 写入动态组件里面定义的 默认属性
+    basicItem.baseAttrs,
+    item.childAttrs
+  );
 
-//   return item
-// }
+  console.log('🏄 # computeFormItem # item', item);
+
+  return item;
+};
+
+// 没明白这里为什么跑出来的是 undefined...
+// watch(
+//   props.itemsConfig,
+//   (val) => {
+//     console.log('🏄 # val', val);
+//     // val.forEach((el) => {
+//     //   console.log('🏄 # val.forEach # el', el);
+//     //   __renderFormItems.value.push(computeFormItem(el));
+//     // });
+
+//     // console.log('🏄 # __renderFormItems.value', __renderFormItems.value);
+//   },
+//   { deep: true, immediate: true }
+// );
 
 // todo
 // 条件渲染：
@@ -70,12 +107,11 @@ defineExpose({
 
 <template>
   <ElForm ref="refYeoForm" v-bind="$attrs" :model="model" :rules="rules">
-    <!-- todo v-for -->
-    <template v-for="(fItems, fIdx) in itemsConfig">
+    <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
       <!-- todo slots -->
 
       <!-- todo isRender -->
-      <ElFormItem :key="fIdx" v-bind="fItems.attrs || {}">
+      <ElFormItem v-bind="fItems.attrs || {}">
         <template v-if="fItems.attrs">
           <component
             :is="fItems.tag"
