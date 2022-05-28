@@ -2,12 +2,15 @@
   <img alt="logo" src="@/assets/logo.png" />
 
   <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
-  <ElButton type="primary" size="large" @click="jumpToAbout">Go to /About</ElButton>
-  <ElButton type="primary" size="large" @click="jumpToTestSWR">Go to /TestSWR</ElButton>
-  <ElButton type="primary" size="large" @click="jumpToMoreRequest">Go to /MoreRequest</ElButton>
-  <ElButton type="primary" size="large" @click="jumpToPaginationRequest">Go to /PaginationRequest</ElButton>
+  <ElButton type="primary" size="large" @click="handleJump('about')">Go to /About</ElButton>
+  <ElButton type="primary" size="large" @click="handleJump('moreRequest')">Go to /MoreRequest</ElButton>
+  <ElButton type="primary" size="large" @click="handleJump('paginationRequest')">Go to /PaginationRequest</ElButton>
 
-  <ElButton type="primary" size="large" @click="jumpToHttp">Go to /demoHttp</ElButton>
+  <!-- Axios -->
+  <ElButton type="primary" size="large" @click="handleJump('demoHttp')">Go to /demoHttp</ElButton>
+
+  <!-- Component -->
+  <ElButton type="primary" size="large" @click="handleJump('demoComponents')">Go to /demoComponents</ElButton>
 
   <div style="margin-top: 16px;">
     <p>{{ "modelCascader - " + modelCascader }}</p>
@@ -45,32 +48,9 @@ console.log('🏄 # store', store.name)
 
 // *Test Router
 const router = useRouter()
-const jumpToAbout = () => {
+const handleJump = (rouerName: string) => {
   router.push({
-    name: 'about',
-    // query: {
-    //   ...route.query,
-    // },
-  })
-}
-const jumpToTestSWR = () => {
-  router.push({
-    name: 'demo',
-  })
-}
-const jumpToMoreRequest = () => {
-  router.push({
-    name: 'moreRequest',
-  })
-}
-const jumpToPaginationRequest = () => {
-  router.push({
-    name: 'paginationRequest',
-  })
-}
-const jumpToHttp = () => {
-  router.push({
-    name: 'demoHttp',
+    name: rouerName,
   })
 }
 
