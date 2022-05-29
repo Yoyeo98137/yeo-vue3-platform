@@ -9,6 +9,9 @@ interface Props {
   model: any;
   rules?: any;
 
+  /** 控制 Layout Row - gutter */
+  gutter?: number;
+
   // submit?: boolean
   // submitContext?: string
   // reset?: boolean
@@ -19,6 +22,8 @@ const props = withDefaults(defineProps<Props>(), {
   rules: () => {
     return {};
   },
+
+  gutter: 20,
 
   // submit: false,
   // submitContext: "查询",
@@ -107,20 +112,24 @@ defineExpose({
 
 <template>
   <ElForm ref="refYeoForm" v-bind="$attrs" :model="model" :rules="rules">
-    <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
-      <!-- todo slots -->
+    <ElRow :gutter="gutter">
+      <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
+        <!-- todo slots -->
 
-      <!-- todo isRender -->
-      <ElFormItem v-bind="fItems.attrs || {}">
-        <template v-if="fItems.attrs">
-          <component
-            :is="fItems.tag"
-            v-model="model[fItems.attrs.prop]"
-            v-bind="fItems.childAttrs || {}"
-          />
-        </template>
-      </ElFormItem>
-    </template>
+        <!-- todo isRender -->
+        <ElCol :span="fItems.span || 24">
+          <ElFormItem v-bind="fItems.attrs || {}">
+            <template v-if="fItems.attrs">
+              <component
+                :is="fItems.tag"
+                v-model="model[fItems.attrs.prop]"
+                v-bind="fItems.childAttrs || {}"
+              />
+            </template>
+          </ElFormItem>
+        </ElCol>
+      </template>
+    </ElRow>
   </ElForm>
 </template>
 

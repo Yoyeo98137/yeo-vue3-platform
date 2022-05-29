@@ -1,9 +1,14 @@
 <template>
   <ElMain>
-    <!-- 表单 -->
-    <YeoForm :model="yeoModel" :itemsConfig="yeoItems" :inline="true" />
-
-    <ElButton type="primary" size="large" @click="handleSubmit">提交</ElButton>
+    <div class="components-box">
+      <!-- 表单 -->
+      <YeoForm :model="yeoModel" :itemsConfig="yeoItems" />
+      <ElButton type="primary" size="large" @click="handleSubmit"
+        >提交</ElButton
+      >
+      <!-- todo -->
+      <ElButton type="primary" size="large" @click="handleReset">重置</ElButton>
+    </div>
   </ElMain>
 </template>
 
@@ -14,6 +19,8 @@ import YeoForm from '@/components/global/YeoForm.vue';
 
 const yeoModel = reactive({
   userName: '',
+  userEmail: '',
+  userAddress: '',
 });
 const yeoItems: TypeItemConfig = [
   {
@@ -24,13 +31,37 @@ const yeoItems: TypeItemConfig = [
     },
     childAttrs: {},
   },
+  {
+    tag: 'input',
+    span: 12,
+    attrs: {
+      label: '用户邮箱',
+      prop: 'userEmail',
+    },
+    childAttrs: {},
+  },
+  {
+    tag: 'input',
+    span: 12,
+    attrs: {
+      label: '用户地址',
+      prop: 'userAddress',
+    },
+    childAttrs: {},
+  },
 ];
 
 const handleSubmit = () => {
   console.log('🏄 # handleSubmit # yeoModel', yeoModel);
 };
+const handleReset = () => {
+  //
+};
 </script>
 
 <style>
-/*  */
+.components-box {
+  width: 45%;
+  text-align: left;
+}
 </style>
