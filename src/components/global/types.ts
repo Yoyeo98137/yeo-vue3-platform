@@ -31,8 +31,10 @@ export interface PropFormItem {
   options?: Array<propOptions> | (() => Promise<any>);
 
   // getAttrs?: (model: any) => any;
-  /** 条件渲染控制 */
-  isRender?: () => boolean;
+  /** 控制条件渲染的开关函数 */
+  isRender?: (model: any) => boolean;
+  /** 实际控制节点渲染的变量 */
+  __isRender?: boolean;
 }
 
 export type TypeItemConfig = Array<PropFormItem>;

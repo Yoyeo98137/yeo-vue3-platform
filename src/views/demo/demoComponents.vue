@@ -21,6 +21,8 @@ const yeoModel = reactive({
   userName: '',
   userEmail: '',
   userAddress: '',
+  userIsRender: 'close',
+  userRender: '',
 });
 const yeoItems: TypeItemConfig = [
   {
@@ -48,6 +50,25 @@ const yeoItems: TypeItemConfig = [
       prop: 'userAddress',
     },
     childAttrs: {},
+  },
+  {
+    tag: 'input',
+    span: 8,
+    attrs: {
+      label: '动态渲染开关',
+      prop: 'userIsRender',
+    },
+    childAttrs: {},
+  },
+  {
+    tag: 'input',
+    span: 24,
+    attrs: {
+      label: '动态渲染',
+      prop: 'userRender',
+    },
+    childAttrs: {},
+    isRender: (model) => model.userIsRender === 'open',
   },
 ];
 

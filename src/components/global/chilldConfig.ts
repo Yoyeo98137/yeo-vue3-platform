@@ -1,6 +1,7 @@
 import { ElInput } from 'element-plus';
 
-export type TypeChildKey = "input" | "select" | "radio"
+// todo
+export type TypeChildKey = 'input' | 'select' | 'radio' | 'switch';
 
 export const chilldConfig = {
   input: {
