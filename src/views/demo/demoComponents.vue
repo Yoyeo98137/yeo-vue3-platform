@@ -2,7 +2,7 @@
   <ElMain>
     <div class="components-box">
       <!-- 表单 -->
-      <YeoForm :model="yeoModel" :itemsConfig="yeoItems" />
+      <YeoForm :model="yeoModel" :itemsConfig="yeoItems" labelWidth="106px" />
       <ElButton type="primary" size="large" @click="handleSubmit"
         >提交</ElButton
       >
@@ -49,11 +49,15 @@ const yeoItems: TypeItemConfig = [
       label: '用户地址',
       prop: 'userAddress',
     },
-    childAttrs: {},
+    childAttrs: {
+      type: 'textarea',
+    },
+    getChildAttrs: (model) =>
+      model.userIsRender === 'open' ? { disabled: true } : {},
   },
   {
     tag: 'input',
-    span: 8,
+    span: 12,
     attrs: {
       label: '动态渲染开关',
       prop: 'userIsRender',
@@ -68,7 +72,10 @@ const yeoItems: TypeItemConfig = [
       prop: 'userRender',
     },
     childAttrs: {},
-    isRender: (model) => model.userIsRender === 'open',
+    // 测试 notices 是否重复添加
+    // getChildAttrs: (model) =>
+    //   model.userIsRender === 'open' ? { disabled: true } : {},
+    // isRender: (model) => model.userIsRender === 'open',
   },
 ];
 
