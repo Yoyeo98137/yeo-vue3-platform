@@ -8,6 +8,7 @@ interface PropItemAttrs {
   prop: string;
   label?: string;
   required?: boolean;
+  [propName: string]: any;
 }
 export interface PropFormItem {
   // todo 插槽的时候或许不需要
@@ -30,11 +31,11 @@ export interface PropFormItem {
    */
   options?: Array<propOptions> | (() => Promise<any>);
 
-  // getAttrs?: (model: any) => any;
-  /** 控制条件渲染的开关函数 */
+  /** 动态控制 组件节点的渲染 */
   isRender?: (model: any) => boolean;
-  /** 实际控制节点渲染的变量 */
-  __isRender?: boolean;
+
+  /** 动态控制 组件属性 childAttrs 的绑定 */
+  getChildAttrs?: (model: any) => any;
 }
 
 export type TypeItemConfig = Array<PropFormItem>;
