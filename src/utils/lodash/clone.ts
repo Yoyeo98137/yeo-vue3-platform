@@ -1,5 +1,5 @@
-import { isRef } from "vue"
-import { isArray, isFunction } from "../ifType"
+import { isRef } from 'vue';
+import { isArray, isAsyncFunction, isFunction } from '../ifType';
 
 /** 函数克隆（仅接收思路，实际没有应用场景） */
 function cloneFunction(func: any) {
@@ -7,20 +7,20 @@ function cloneFunction(func: any) {
   const paramReg = /(?<=\().+(?=\)\s+{)/;
   // 函数输出为字符串，方便通过正则进行查找 函数体、参数体
   const funcString = func.toString();
-  console.log("🏄 #### cloneFunction #### funcString", funcString);
+  console.log('🏄 #### cloneFunction #### funcString', funcString);
 
   if (func.prototype) {
-    console.log("普通函数");
+    console.log('普通函数');
 
     const param = paramReg.exec(funcString);
     const body = bodyReg.exec(funcString);
 
     if (body) {
-      console.log("匹配到函数体：", body[0]);
+      console.log('匹配到函数体：', body[0]);
 
       if (param) {
-        const paramArr = param[0].split(",");
-        console.log("匹配到参数：", paramArr);
+        const paramArr = param[0].split(',');
+        console.log('匹配到参数：', paramArr);
 
         return new Function(...paramArr, body[0]);
       } else {
@@ -56,7 +56,7 @@ function cloneFunction(func: any) {
  *            引用类型在内存中存储的值其实是一个 指向堆内存对象的地址指针
  *
  * 深拷贝就是为了让引用类型在拷贝的时候，也通过开辟新空间来新建变量
- * 
+ *
  * Plus:
  * @see: https://segmentfault.com/a/1190000020255831
  */
@@ -91,7 +91,6 @@ function deepClone<T>(target: T, map = new Map()) {
 
   // 通过遍历的方式，给新空间补充定义值
   for (const key in target) {
-
     // todo too bad...
     // 兼容 响应式对象 值拷贝
     if (isRef(target[key])) {
@@ -104,7 +103,7 @@ function deepClone<T>(target: T, map = new Map()) {
       // 而不去改变值的结构
       copyTarget[key] = target[key];
       // copyTarget[key] = target[key].value;
-      continue
+      continue;
     }
 
     // 实际上克隆函数是没有实际应用场景的，
@@ -116,6 +115,12 @@ function deepClone<T>(target: T, map = new Map()) {
       continue;
     }
 
+    // 异步函数，直接返回
+    if (isAsyncFunction(target[key])) {
+      copyTarget[key] = target[key];
+      continue;
+    }
+
     // console.log("🏄 #### key", key, target[key]);
     copyTarget[key] = deepClone(target[key], map);
   }
@@ -123,4 +128,4 @@ function deepClone<T>(target: T, map = new Map()) {
   return copyTarget;
 }
 
-export default deepClone
+export default deepClone;
