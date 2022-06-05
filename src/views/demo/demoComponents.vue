@@ -2,7 +2,17 @@
   <ElMain>
     <div class="components-box">
       <!-- 表单 -->
-      <YeoForm :model="yeoModel" :itemsConfig="yeoItems" labelWidth="106px" />
+      <YeoForm
+        ref="refDemoForm"
+        :model="yeoModel"
+        :itemsConfig="yeoItems"
+        labelWidth="106px"
+      >
+        <template #slotTest="{ model }">
+          <span>This is Slot.</span>
+          <span>{{ JSON.stringify(model) }}</span>
+        </template>
+      </YeoForm>
       <ElButton type="primary" size="large" @click="handleSubmit"
         >提交</ElButton
       >
@@ -13,23 +23,39 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { TypeItemConfig } from '@/components/global/formConfig/types';
+import { emptyString } from '@/utils/ifType';
 import YeoForm from '@/components/global/YeoForm.vue';
 
+const refDemoForm = ref();
 const yeoModel = reactive({
   userName: '',
   userEmail: '',
   userSex: 1,
   userAddress: '',
   userSelectional: 1,
+  userSlot: '',
 });
+
+const validateTest = (rule: any, value: any, callback: any) => {
+  if (emptyString(value)) {
+    callback(new Error('请输入用户邮箱!'));
+  } else {
+    callback();
+  }
+};
 const yeoItems: TypeItemConfig = [
   {
     tag: 'input',
     attrs: {
       label: '用户名称',
       prop: 'userName',
+      rules: {
+        trigger: 'change',
+        required: true,
+        message: '请输入用户名称!',
+      },
     },
     childAttrs: {},
   },
@@ -39,6 +65,11 @@ const yeoItems: TypeItemConfig = [
     attrs: {
       label: '用户邮箱',
       prop: 'userEmail',
+      rules: {
+        trigger: 'change',
+        required: true,
+        validator: validateTest,
+      },
     },
     childAttrs: {},
     getChildAttrs: (model) => (model.userSex === 1 ? {} : { disabled: true }),
@@ -81,6 +112,15 @@ const yeoItems: TypeItemConfig = [
     },
     options: async () => await todoApi(),
   },
+  {
+    tag: 'input',
+    span: 24,
+    slotKey: 'slotTest',
+    attrs: {
+      label: '测试插槽',
+      prop: 'userSlot',
+    },
+  },
 ];
 
 const todoApi = () => {
@@ -95,11 +135,14 @@ const todoApi = () => {
       ];
       // * 要记得 “结束” 这个 Promise
       resolve(data);
-    }, 3200);
+    }, 1620);
   });
 };
 const handleSubmit = () => {
-  console.log('🏄 # handleSubmit # yeoModel', yeoModel);
+  refDemoForm.value.refYeoForm.validate((boolean: Boolean) => {
+    console.log('🏄 # handleSubmit # yeoModel', yeoModel);
+    console.log('🏄 # handleSubmit # boolean', boolean);
+  });
 };
 const handleReset = () => {
   //
