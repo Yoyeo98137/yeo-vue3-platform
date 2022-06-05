@@ -1,4 +1,4 @@
-## 开始 
+## 开始
 
 如果还没有安装 pnpm
 
@@ -31,6 +31,7 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 - [x] 级联选择器：多选 + 懒加载 + 动态回显 + loading
 - [x] useRequest
 - [ ] axios
+- [x] 表单组件
 - [ ] ...
 
 ### useRequest
@@ -59,4 +60,4 @@ Vue 3 + Typescript + Vite + vue-router + Pinia + scss + Element Plus
 
 > https://github.com/vercel/swr  
 > https://www.attojs.com/  
-> https://ahooks.gitee.io/zh-CN  
+> https://ahooks.gitee.io/zh-CN
