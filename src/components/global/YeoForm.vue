@@ -59,8 +59,9 @@ const attrs = useAttrs();
 console.log('🏄 # attrs', attrs);
 
 onMounted(() => {
+  // 配合配置项生成 el-form-item 所需内容（节点、属性等）
   __renderFormItems.value = props.itemsConfig.map((el) => computeFormItem(el));
-  // 配置初始化，通知默认值
+  // 配置初始化之后，通知默认值更新
   notifyModelEvents();
   // 通知异步队列更新
   notifyAsyncModelEvents();
@@ -381,11 +382,15 @@ defineExpose({
 
     <ElRow :gutter="gutter">
       <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
-        <!-- todo slots -->
-
         <ElCol v-show="fItems.__isRender" :span="fItems.span || 24">
           <ElFormItem v-bind="fItems.attrs || {}">
-            <template v-if="fItems.attrs">
+            <!-- Slots -->
+            <template v-if="fItems.slotKey">
+              <slot :name="fItems.slotKey" :model="props.model"></slot>
+            </template>
+
+            <!-- Compontents -->
+            <template v-else-if="fItems.attrs">
               <component
                 :is="fItems.tag"
                 v-model="model[fItems.attrs.prop]"
