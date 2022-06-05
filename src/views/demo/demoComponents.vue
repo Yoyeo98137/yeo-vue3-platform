@@ -14,15 +14,15 @@
 
 <script lang="ts" setup>
 import { reactive } from 'vue';
-import { TypeItemConfig } from '@/components/global/types';
+import { TypeItemConfig } from '@/components/global/formConfig/types';
 import YeoForm from '@/components/global/YeoForm.vue';
 
 const yeoModel = reactive({
   userName: '',
   userEmail: '',
+  userSex: 1,
   userAddress: '',
-  userIsRender: 'close',
-  userRender: '',
+  userSelectional: 1,
 });
 const yeoItems: TypeItemConfig = [
   {
@@ -35,16 +35,34 @@ const yeoItems: TypeItemConfig = [
   },
   {
     tag: 'input',
-    span: 12,
+    span: 18,
     attrs: {
       label: '用户邮箱',
       prop: 'userEmail',
     },
     childAttrs: {},
+    getChildAttrs: (model) => (model.userSex === 1 ? {} : { disabled: true }),
+  },
+  {
+    tag: 'radio',
+    attrs: {
+      label: '用户性别',
+      prop: 'userSex',
+    },
+    options: [
+      {
+        label: '男',
+        value: 1,
+      },
+      {
+        label: '女',
+        value: 0,
+      },
+    ],
   },
   {
     tag: 'input',
-    span: 12,
+    span: 24,
     attrs: {
       label: '用户地址',
       prop: 'userAddress',
@@ -52,33 +70,34 @@ const yeoItems: TypeItemConfig = [
     childAttrs: {
       type: 'textarea',
     },
-    getChildAttrs: (model) =>
-      model.userIsRender === 'open' ? { disabled: true } : {},
+    isRender: (model) => model.userSex === 1,
   },
   {
-    tag: 'input',
-    span: 12,
-    attrs: {
-      label: '动态渲染开关',
-      prop: 'userIsRender',
-    },
-    childAttrs: {},
-  },
-  {
-    tag: 'input',
+    tag: 'select',
     span: 24,
     attrs: {
-      label: '动态渲染',
-      prop: 'userRender',
+      label: '用户选项',
+      prop: 'userSelectional',
     },
-    childAttrs: {},
-    // 测试 notices 是否重复添加
-    // getChildAttrs: (model) =>
-    //   model.userIsRender === 'open' ? { disabled: true } : {},
-    // isRender: (model) => model.userIsRender === 'open',
+    options: async () => await todoApi(),
   },
 ];
 
+const todoApi = () => {
+  console.log('await todoApi start');
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log('await todoApi over');
+      const data = [
+        { label: '全部', value: 0 },
+        { label: '其他', value: 1 },
+      ];
+      // * 要记得 “结束” 这个 Promise
+      resolve(data);
+    }, 3200);
+  });
+};
 const handleSubmit = () => {
   console.log('🏄 # handleSubmit # yeoModel', yeoModel);
 };
