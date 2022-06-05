@@ -109,14 +109,14 @@ function deepClone<T>(target: T, map = new Map()) {
     // 实际上克隆函数是没有实际应用场景的，
     // 两个对象使用一个在内存中处于同一个地址的函数也是没有任何问题的，
     // 像 lodash 中对函数的拷贝，也是直接将值返回了
-    if (isFunction(target[key])) {
-      copyTarget[key] = cloneFunction(target[key]);
-      // copyTarget[key] = target[key];
-      continue;
-    }
+    // if (isFunction(target[key])) {
+    //   copyTarget[key] = cloneFunction(target[key]);
+    //   // copyTarget[key] = target[key];
+    //   continue;
+    // }
 
-    // 异步函数，直接返回
-    if (isAsyncFunction(target[key])) {
+    // 识别到函数，直接返回
+    if (isFunction(target[key]) || isAsyncFunction(target[key])) {
       copyTarget[key] = target[key];
       continue;
     }
