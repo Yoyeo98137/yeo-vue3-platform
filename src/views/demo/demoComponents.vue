@@ -35,6 +35,8 @@ const yeoModel = reactive({
   userSex: 1,
   userAddress: '',
   userSelectional: 1,
+  // todo 有个问题，如果是 0 的话好像回显不对
+  userSelectional2: 6,
   userSlot: '',
 });
 
@@ -111,6 +113,19 @@ const yeoItems: TypeItemConfig = [
       prop: 'userSelectional',
     },
     options: async () => await todoApi(),
+    // options: async () => todoApi(),
+    // options: () => todoApi(),
+  },
+  {
+    tag: 'select',
+    span: 24,
+    attrs: {
+      label: '用户选项2',
+      prop: 'userSelectional2',
+    },
+    options: async () => await todoApi2(),
+    // options: async () => todoApi(),
+    // options: () => todoApi(),
   },
   {
     tag: 'input',
@@ -124,18 +139,32 @@ const yeoItems: TypeItemConfig = [
 ];
 
 const todoApi = () => {
-  console.log('await todoApi start');
+  console.log('await GG todoApi start');
 
   return new Promise((resolve) => {
     setTimeout(() => {
-      console.log('await todoApi over');
+      console.log('await GG todoApi over');
       const data = [
         { label: '全部', value: 0 },
         { label: '其他', value: 1 },
       ];
       // * 要记得 “结束” 这个 Promise
       resolve(data);
-    }, 1620);
+    }, 2066);
+  });
+};
+const todoApi2 = () => {
+  console.log('await GG todoApi2 start');
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log('await GG todoApi2 over');
+      const data = [
+        { label: '全部', value: 6 },
+      ];
+      // * 要记得 “结束” 这个 Promise
+      resolve(data);
+    }, 626);
   });
 };
 const handleSubmit = () => {

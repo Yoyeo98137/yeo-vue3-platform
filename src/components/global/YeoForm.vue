@@ -173,15 +173,18 @@ const setingOptions = <T extends PropsRenderItem>(item: T) => {
       pushSubsModel({
         idKey: item.idKey as symbol,
         k: 'childAttrs',
-        cb: async () => {
-          const res =
-            typeof item.options === 'function' && (await item.options?.());
 
-          return {
-            options: res,
-            loading: false,
-          };
-        },
+        // todo 这块还可以再改改
+        cb: item.options as any,
+        // cb: async () => {
+        //   const res =
+        //     typeof item.options === 'function' && (await item.options?.());
+
+        //   return {
+        //     options: res,
+        //     loading: false,
+        //   };
+        // },
       });
     }
   }
@@ -316,50 +319,47 @@ watch(
 );
 
 /**
- * todo promise 问题
  * 接收异步事件，用来异步更新 options
  */
 const subsAsyncModelCenter: Ref<ItemAsyncSubs[]> = ref([]);
-const notifyAsyncModelEvents = async () => {
-  const promiseAsync = [
-    ...subsAsyncModelCenter.value.map((el) => {
-      el.cb?.().then((res) => {
-        if (!res) return;
+const notifyAsyncModelEvents = () => {
+  const promiseAsync = subsAsyncModelCenter.value.map(async (el) => {
+    return el.cb().then((res) => {
+      if (!res) return null;
 
-        __renderFormItems.value = __renderFormItems.value.map((fItems) => {
-          if (fItems.idKey === el.idKey) {
-            fItems[el.k] = res;
-          }
-
-          return fItems;
-        });
-
-        // 还原选中值
-        if (el.echoVal) {
-          isSkipModelNotify.value = true;
-          props.model[el.prop] = el.echoVal;
+      __renderFormItems.value = __renderFormItems.value.map((fItems) => {
+        if (fItems.idKey === el.idKey) {
+          fItems[el.k] = {
+            options: res,
+            loading: false,
+          };
         }
 
-        console.log(
-          '🏄 # el.cb # __renderFormItems.value',
-          __renderFormItems.value
-        );
+        return fItems;
       });
 
-      return el;
-    }),
-  ];
-  await Promise.all(promiseAsync)
+      // 还原选中值
+      if (el.echoVal) {
+        isSkipModelNotify.value = true;
+        props.model[el.prop] = el.echoVal;
+      }
+
+      return res;
+    });
+  });
+
+  Promise.all(promiseAsync)
     .then((res) => {
-      console.log('🏄 # .then # res', res);
+      console.log('🏄 # GG # .then # res', res);
       /** res */
     })
     .catch(() => {
       /** err */
     })
     .finally(() => {
-      console.log('🏄 # promiseAsync # finally');
-      // subsAsyncModelCenter.value.length = 0
+      console.log('🏄 # GG # promiseAsync # finally');
+      // 执行完后清理一下异步事件
+      subsAsyncModelCenter.value.length = 0
     });
 };
 
