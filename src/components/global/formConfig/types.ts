@@ -1,4 +1,11 @@
+import type { ElForm } from 'element-plus';
 import { KeyChildConfig } from './chilldConfig';
+
+/**
+ * 因为这里 InstanceType 得到的属性都是必填属性，使用时就会产生多余的传入参数警告
+ * 通过 Partial 将其属性都转为可选属性，这样即保留了 elm 的类型判断，也避免了多余的输入报警
+ */
+export type TypeElmForm = Partial<InstanceType<typeof ElForm>>;
 
 interface propOptions {
   label: string;
