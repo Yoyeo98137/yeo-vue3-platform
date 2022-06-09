@@ -28,7 +28,9 @@ import { TypeItemConfig } from '@/components/global/formConfig/types';
 import { emptyString } from '@/utils/ifType';
 import YeoForm from '@/components/global/YeoForm.vue';
 
-const refDemoForm = ref();
+type TypeYeoFormRef = InstanceType<typeof YeoForm>;
+
+const refDemoForm = ref<TypeYeoFormRef>();
 const yeoModel = reactive({
   userName: '',
   userEmail: '',
@@ -159,16 +161,14 @@ const todoApi2 = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log('await GG todoApi2 over');
-      const data = [
-        { label: '全部', value: 6 },
-      ];
+      const data = [{ label: '全部', value: 6 }];
       // * 要记得 “结束” 这个 Promise
       resolve(data);
     }, 626);
   });
 };
 const handleSubmit = () => {
-  refDemoForm.value.refYeoForm.validate((boolean: Boolean) => {
+  refDemoForm.value?.refYeoForm?.validate?.((boolean) => {
     console.log('🏄 # handleSubmit # yeoModel', yeoModel);
     console.log('🏄 # handleSubmit # boolean', boolean);
   });

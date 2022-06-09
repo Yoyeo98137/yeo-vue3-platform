@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, Ref, ref, shallowRef, useAttrs, watch } from 'vue';
 import {
+  TypeElmForm,
   PropsRenderItem,
   TypeItemConfig,
   ItemAsyncSubs,
@@ -20,7 +21,7 @@ import deepClone from '@/utils/lodash/clone';
 
 // Types.
 
-interface Props {
+interface Props extends TypeElmForm {
   itemsConfig: TypeItemConfig;
   model: any;
   rules?: any;
@@ -32,9 +33,6 @@ interface Props {
   // submitContext?: string
   // reset?: boolean
   // resetContext?: string
-
-  // 避免传入 el-form 自身属性导致的 ts 报错
-  [propName: string]: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -72,7 +70,7 @@ onMounted(() => {
  * 在 elm 的某些组件中传入 “意外的属性（在这里是 options）” 会导致控制台的类型警告
  */
 const filterNotOptMap = ['dataPicker'];
-const refYeoForm = ref();
+const refYeoForm = ref<TypeElmForm>();
 // 处理渲染 el-form-item
 const __renderFormItems: Ref<TypeRenderItemConfig> = shallowRef([]);
 // shallowRef：创建一个跟踪自身 .value 变化的 ref，但不会使其值也变成响应式的。
@@ -359,7 +357,7 @@ const notifyAsyncModelEvents = () => {
     .finally(() => {
       console.log('🏄 # GG # promiseAsync # finally');
       // 执行完后清理一下异步事件
-      subsAsyncModelCenter.value.length = 0
+      subsAsyncModelCenter.value.length = 0;
     });
 };
 
@@ -377,9 +375,6 @@ defineExpose({
     :rules="rules"
     size="default"
   >
-    <!-- todo 看看有没有办法能 继承到 el-form 里面定义的属性字段提示 -->
-    <!-- :label-width="" -->
-
     <ElRow :gutter="gutter">
       <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
         <ElCol v-show="fItems.__isRender" :span="fItems.span || 24">
