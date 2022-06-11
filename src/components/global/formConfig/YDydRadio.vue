@@ -1,17 +1,13 @@
 <script lang="ts" setup>
-import { useSlots } from 'vue';
+import { useAttrs, useSlots } from 'vue';
 import { notEmptyObject } from '@/utils/ifType';
-
+const attrs: any = useAttrs();
 const slots: any = useSlots();
-console.log('🏄 # slots', slots);
 </script>
 
 <template>
   <ElRadioGroup v-bind="$attrs">
-    <!-- todo -->
-    <!-- {{ $slots }} -->
-
-    <template v-for="(fRadio, fIndex) in $attrs.options" :key="fIndex">
+    <template v-for="(fRadio, fIndex) in attrs.options" :key="fIndex">
       <ElRadio :label="fRadio.value">
         <!-- 当定义了自定义插槽名，且传入了插槽节点时 -->
         <template v-if="fRadio.slotName && notEmptyObject(slots)">
@@ -23,6 +19,4 @@ console.log('🏄 # slots', slots);
   </ElRadioGroup>
 </template>
 
-<style scoped>
-/*  */
-</style>
+<style lang="scss"></style>

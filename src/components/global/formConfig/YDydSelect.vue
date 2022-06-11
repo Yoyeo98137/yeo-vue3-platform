@@ -4,12 +4,15 @@
 
 <template>
   <ElSelect v-bind="$attrs">
-    <template v-for="fSelect in ($attrs.options as any)" :key="fSelect.value">
+    <template
+      v-for="(fSelect, fIndex) in ($attrs.options as any)"
+      :key="fIndex"
+    >
       <ElOption :label="fSelect.label" :value="fSelect.value"></ElOption>
     </template>
   </ElSelect>
 </template>
 
-<style scoped>
-/*  */
+<style lang="scss">
+//
 </style>
