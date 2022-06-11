@@ -1,14 +1,18 @@
-import { ElInput, ElSwitch, ElCheckbox } from 'element-plus';
-import YDydSelect from './YDydSelect.vue';
-import YDydRadio from './YDydRadio.vue';
+import { ElInput, ElDatePicker } from 'element-plus';
+import YDydNumberInput from '@/components/global/formConfig/YDydNumberInput.vue';
+import YDydSelect from '@/components/global/formConfig/YDydSelect.vue';
+import YDydRadio from '@/components/global/formConfig/YDydRadio.vue';
+import YDydComplexInput from '@/components/global/formConfig/YDydComplexInput.vue';
+import YDydComplexData from '@/components/global/formConfig/YDydComplexData.vue';
 
-// todo
 export type KeyChildConfig =
   | 'input'
-  | 'switch'
+  | 'numberInput'
+  | 'dataPicker'
   | 'select'
   | 'radio'
-  | 'checkout';
+  | 'complexInput'
+  | 'complexData';
 
 interface ValChildConfig {
   component: any;
@@ -22,35 +26,47 @@ export const chilldConfig: TypeChildConfig = {
     component: ElInput,
     baseAttrs: {
       clearable: true,
-      // ...
     },
   },
-
-  // todo
-  // 很奇怪就这个 Switch 会存在样式丢失问题
-  switch: {
-    component: ElSwitch,
-    baseAttrs: {
-      // ...
-    },
-  },
-
   select: {
     component: YDydSelect,
-    baseAttrs: {
-      // ...
-    },
+    baseAttrs: {},
   },
-
   radio: {
     component: YDydRadio,
     baseAttrs: {},
   },
 
-  checkout: {
-    component: ElCheckbox,
+  numberInput: {
+    component: YDydNumberInput,
     baseAttrs: {
-      // ...
+      clearable: true,
     },
+  },
+  dataPicker: {
+    component: ElDatePicker,
+    baseAttrs: {
+      type: 'daterange',
+      rangeSeparator: '~',
+      startPlaceholder: '开始日期',
+      endPlaceholder: '结束日期',
+      valueFormat: 'x',
+      // 范围选择时选中日期所使用的当日内具体时刻
+      // 业务计算到最后的实际 23:59:59
+      defaultTime: [
+        new Date(2000, 1, 1, 0, 0, 0),
+        new Date(2000, 2, 1, 23, 59, 59),
+      ],
+    },
+  },
+  /** 复合型输入框 */
+  complexInput: {
+    component: YDydComplexInput,
+    baseAttrs: {},
+  },
+  /** 复合型时间选择器 */
+  complexData: {
+    component: YDydComplexData,
+    baseAttrs: {},
   },
 };
