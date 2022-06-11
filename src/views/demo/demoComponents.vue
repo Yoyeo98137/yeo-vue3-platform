@@ -13,11 +13,6 @@
           <span>{{ JSON.stringify(model) }}</span>
         </template>
       </YeoForm>
-      <ElButton type="primary" size="large" @click="handleSubmit"
-        >提交</ElButton
-      >
-      <!-- todo -->
-      <ElButton type="primary" size="large" @click="handleReset">重置</ElButton>
     </div>
   </ElMain>
 </template>

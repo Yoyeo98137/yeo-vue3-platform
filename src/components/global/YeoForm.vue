@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, Ref, ref, shallowRef, useAttrs, watch } from 'vue';
+import YDydFormCol from './formConfig/YDydFormCol.vue';
 import {
   TypeElmForm,
   PropsRenderItem,
@@ -16,6 +17,7 @@ import {
   isFunction,
   isNumber,
   isString,
+  isUndefined,
 } from '@/utils/ifType';
 import deepClone from '@/utils/lodash/clone';
 
@@ -29,10 +31,10 @@ interface Props extends TypeElmForm {
   /** 控制 Layout Row - gutter */
   gutter?: number;
 
-  // submit?: boolean
-  // submitContext?: string
-  // reset?: boolean
-  // resetContext?: string
+  search?: boolean;
+  searchContext?: string;
+  reset?: boolean;
+  resetContext?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -43,18 +45,19 @@ const props = withDefaults(defineProps<Props>(), {
 
   gutter: 20,
 
-  // submit: false,
-  // submitContext: "查询",
-  // reset: false,
-  // resetContext: "重置",
+  search: false,
+  searchContext: '查询',
+  reset: false,
+  resetContext: '重置',
 });
-// const emits = defineEmits<{
-//   (e: "onSearch"): void
-//   (e: "onReset"): void
-// }>()
+const emits = defineEmits<{
+  (e: 'onSearch'): void;
+  (e: 'onReset'): void;
+}>();
 
 const attrs = useAttrs();
-console.log('🏄 # attrs', attrs);
+/** 检测是否开启 行内表单模式，开启了则不走 row-col 的布局 */
+const attrsIsInLine = ref(!isUndefined(attrs.inline));
 
 onMounted(() => {
   // 配合配置项生成 el-form-item 所需内容（节点、属性等）
@@ -361,6 +364,14 @@ const notifyAsyncModelEvents = () => {
     });
 };
 
+const onSearchEmit = function () {
+  emits('onSearch');
+};
+// todo 内置重置表单的方法
+const onResetEmit = function () {
+  emits('onReset');
+};
+
 defineExpose({
   refYeoForm,
 });
@@ -375,9 +386,13 @@ defineExpose({
     :rules="rules"
     size="default"
   >
-    <ElRow :gutter="gutter">
+    <ElRow :gutter="attrsIsInLine ? 0 : gutter">
       <template v-for="(fItems, fIdx) in __renderFormItems" :key="fIdx">
-        <ElCol v-show="fItems.__isRender" :span="fItems.span || 24">
+        <YDydFormCol
+          v-show="fItems.__isRender"
+          :span="fItems.span || 24"
+          :original="attrsIsInLine"
+        >
           <ElFormItem v-bind="fItems.attrs || {}">
             <!-- Slots -->
             <template v-if="fItems.slotKey">
@@ -391,12 +406,21 @@ defineExpose({
                 v-model="model[fItems.attrs.prop]"
                 v-bind="fItems.childAttrs || {}"
               />
-              <!-- 组件自动引入的问题？ -->
-              <!-- 必须要在页面的某个地方注册一次，才能拿到组件样式 -->
-              <!-- <el-switch v-model="model[fItems.attrs.prop]" /> -->
             </template>
           </ElFormItem>
-        </ElCol>
+        </YDydFormCol>
+      </template>
+
+      <!-- 配合查询表格场景下的通用按钮组 -->
+      <template v-if="search || reset">
+        <div class="plus-form-btns">
+          <ElButton v-if="search" type="primary" @click="onSearchEmit">{{
+            searchContext
+          }}</ElButton>
+          <ElButton v-if="reset" @click="onResetEmit">{{
+            resetContext
+          }}</ElButton>
+        </div>
       </template>
     </ElRow>
   </ElForm>
