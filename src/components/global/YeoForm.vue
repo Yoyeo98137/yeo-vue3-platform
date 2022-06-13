@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, Ref, ref, shallowRef, useAttrs, watch } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onMounted, ref, shallowRef, useAttrs, watch } from 'vue';
 import YDydFormCol from './formConfig/YDydFormCol.vue';
 import {
   TypeElmForm,
@@ -10,14 +11,15 @@ import {
   TypeRenderItemConfig,
   PropsWatchEvents,
 } from './formConfig/types';
-import { chilldConfig } from './formConfig/chilldConfig';
+import { chilldConfig, KeyChildConfig } from './formConfig/chilldConfig';
 import {
   isArray,
-  isAsyncFunction,
   isFunction,
+  isNull,
   isNumber,
   isString,
   isUndefined,
+  notEmptyObject,
 } from '@/utils/ifType';
 import deepClone from '@/utils/lodash/clone';
 
@@ -59,20 +61,8 @@ const attrs = useAttrs();
 /** 检测是否开启 行内表单模式，开启了则不走 row-col 的布局 */
 const attrsIsInLine = ref(!isUndefined(attrs.inline));
 
-onMounted(() => {
-  // 配合配置项生成 el-form-item 所需内容（节点、属性等）
-  __renderFormItems.value = props.itemsConfig.map((el) => computeFormItem(el));
-  // 配置初始化之后，通知默认值更新
-  notifyModelEvents();
-  // 通知异步队列更新
-  notifyAsyncModelEvents();
-});
-
-/**
- * 过滤不需要 options 配置的组件名，
- * 在 elm 的某些组件中传入 “意外的属性（在这里是 options）” 会导致控制台的类型警告
- */
-const filterNotOptMap = ['dataPicker'];
+/** 保留 model 的初始值 */
+let cacheOriginalModel: any = null;
 const refYeoForm = ref<TypeElmForm>();
 // 处理渲染 el-form-item
 const __renderFormItems: Ref<TypeRenderItemConfig> = shallowRef([]);
@@ -82,10 +72,26 @@ const __renderFormItems: Ref<TypeRenderItemConfig> = shallowRef([]);
 // and should be avoided by marking the component with `markRaw` or using `shallowRef` instead of `ref`.
 // const __renderFormItems: Ref<TypeRenderItemConfig> = ref([]);
 
+onMounted(() => {
+  // set Original
+  cacheOriginalModel = deepClone(props.model);
+
+  // 配合配置项生成 el-form-item 所需内容（节点、属性等）
+  __renderFormItems.value = props.itemsConfig.map((el) => computeFormItem(el));
+
+  // 配置初始化之后，通知默认值更新
+  notifyModelEvents();
+  // 通知异步队列更新
+  notifyAsyncModelEvents();
+});
+
 /** 合并 原有的/手动添加的 childAttrs */
-const doMergeChildAttrs = <TOrigin, TGetAttrs extends Function | undefined>(
+const doMergeChildAttrs = <
+  TOrigin,
+  TGetAttrs extends <T>(args: T) => any | undefined
+>(
   originAttrs: TOrigin,
-  targetAttrs: TGetAttrs
+  targetAttrs?: TGetAttrs
 ) => {
   return () => ({
     ...originAttrs,
@@ -106,6 +112,19 @@ const computeFormItem = (formItem: PropsRenderItem) => {
   if (!basicItem) throw new Error(`配置了不存在的组件类型 tag: ${tag}`);
   item.tag = basicItem.component;
 
+  const { config } = resetComplexConfig(item, tag);
+  const getOptions = setingOptions(item, tag);
+
+  // 合并子表单项的 attrs
+  item.childAttrs = Object.assign(
+    {},
+    // 写入动态组件里面定义的 默认属性
+    basicItem.baseAttrs,
+    item.childAttrs,
+    getOptions,
+    notEmptyObject(config) ? { config } : {}
+  );
+
   // 控制组件动态渲染
   item.__isRender = true;
   if (isFunction(item.isRender)) {
@@ -120,23 +139,6 @@ const computeFormItem = (formItem: PropsRenderItem) => {
     });
   }
 
-  const { options, loading } = setingOptions(item);
-  const filterOptIdx = filterNotOptMap.findIndex((ele) => ele === tag);
-
-  // 合并子表单项的 attrs
-  item.childAttrs = Object.assign(
-    {},
-    // 写入动态组件里面定义的 默认属性
-    basicItem.baseAttrs,
-    item.childAttrs,
-    // { options } -> { options: options }
-    filterOptIdx === -1
-      ? {
-          options,
-          loading,
-        }
-      : {}
-  );
   /** 保留原本的 childAttrs 引用，避免被 getChildAttrs 所影响 */
   const originalChildAttrs = item.childAttrs;
   // 控制组件动态更新属性绑定
@@ -149,45 +151,59 @@ const computeFormItem = (formItem: PropsRenderItem) => {
   }
 
   console.log('🏄 # computeFormItem # item', item);
-
   return item;
 };
 
+/**
+ * 过滤不需要 options 配置的组件名，
+ * 在 elm 的某些组件中传入 “意外的属性（在这里是 options）” 会导致控制台的类型警告
+ */
+const shouldExcludeOptMaps = ['dataPicker'];
 /** 适配不同类型 options 的属性设置 */
-const setingOptions = <T extends PropsRenderItem>(item: T) => {
+const setingOptions = <T extends PropsRenderItem>(item: T, tag: string) => {
+  const excludeOptIdx = shouldExcludeOptMaps.findIndex(
+    (excludeTag) => excludeTag === tag
+  );
+  if (excludeOptIdx !== -1) return {};
+
   let options = null;
   /** 提供内部控制的 loading 状态变更 */
   let hasSelfLoading = false;
 
   if (item.options) {
     if (isArray(item.options)) {
-      // 数组 直接赋值
+      // 数组，直接赋值
       options = item.options;
-    } else if (isFunction(item.options) && typeof item.options === 'function') {
-      // 函数 调用赋值
-      options = item.options();
-    } else if (isAsyncFunction(item.options)) {
+
+      // 函数，推入异步事件数组再做更新
+    } else if (isFunction(item.options)) {
       // 默认开启 loading 加载
       hasSelfLoading = true;
 
-      // 异步函数，并推入事件记录队列
-      pushSubsModel({
-        idKey: item.idKey as symbol,
-        k: 'childAttrs',
+      // 记录需要回显的绑定值
+      let echoVal = null;
+      // 当这个数据是需要通过异步事件（请求）获取，然后又携带了回显赋值的时候
+      // 则记录回显值
+      if (item.attrs) {
+        if (checkHasBindVal(props.model[item.attrs.prop])) {
+          isSkipModelNotify.value = true;
+          echoVal = props.model[item.attrs.prop];
+          props.model[item.attrs.prop] = null;
+        }
+      }
 
-        // todo 这块还可以再改改
-        cb: item.options as any,
-        // cb: async () => {
-        //   const res =
-        //     typeof item.options === 'function' && (await item.options?.());
-
-        //   return {
-        //     options: res,
-        //     loading: false,
-        //   };
-        // },
+      // 然后再推入到异步事件数组
+      subsAsyncModelCenter.value.push({
+        // xxx! 非空断言保护
+        idKey: item.idKey!,
+        callback: item.options as any,
+        prop: item.attrs?.prop as string,
+        echoVal,
       });
     }
+
+    // 清理之前的引入，由 childAttrs 统一处理
+    delete item.options;
   }
 
   return {
@@ -205,6 +221,32 @@ const checkHasBindVal = (val: any) => {
 };
 
 /**
+ * 这类组件需要在内部自定义某些数据类型
+ * 会把模型数据 Model 和当前绑定键值 prop 带过去
+ */
+const shouldSetConfigMaps = ['complexInput', 'complexData'];
+/**
+ * 设置 需要提供自定义绑定表单能力的 config
+ * 为了兼容复合型输入框
+ */
+const resetComplexConfig = (item: PropsRenderItem, tag: KeyChildConfig) => {
+  let config = {};
+  if (shouldSetConfigMaps.findIndex((ele) => ele === tag) !== -1) {
+    // 复合型输入框不需要再显示左侧的 label 文案
+    item.attrs?.label && (item.attrs.label = '');
+
+    config = {
+      model: props.model,
+      bindKey: item.attrs?.prop,
+    };
+  }
+
+  return {
+    config,
+  };
+};
+
+/**
  * 接收动态更新项的 订阅中心，
  * 比如动态控制 节点渲染、组件属性 Attributes 等
  */
@@ -212,22 +254,19 @@ const subsModelCenter: Ref<PropsWatchEvents[]> = ref([]);
 /** 加入需要订阅的相关内容 */
 const pushSubsModel: TypeSubsPush = ({ idKey, k, cb }) => {
   const subsIdx = subsModelCenter.value.findIndex((subs) => subs.key === idKey);
+  const subsVal: any = {
+    k,
+    cb,
+  };
+
   // 避免重复添加相同的 key
   if (subsIdx === -1) {
     subsModelCenter.value.push({
       key: idKey,
-      notices: [
-        {
-          k,
-          cb,
-        },
-      ],
+      notices: [subsVal],
     });
   } else {
-    subsModelCenter.value[subsIdx].notices?.push({
-      k,
-      cb,
-    });
+    subsModelCenter.value[subsIdx].notices?.push(subsVal);
   }
 };
 /**
@@ -242,10 +281,6 @@ const pushSubsModel: TypeSubsPush = ({ idKey, k, cb }) => {
  * 有点难度了...
  */
 const notifyModelEvents = () => {
-  console.log(
-    '🏄 # notifyModelEvents # subsModelCenter.value',
-    subsModelCenter.value
-  );
   if (!subsModelCenter.value.length) return;
 
   subsModelCenter.value.forEach((watchEL) => {
@@ -260,39 +295,8 @@ const notifyModelEvents = () => {
     __renderFormItems.value = __renderFormItems.value.map((fItems, idx) => {
       if (idx === curItemsIdx && watchEL.notices?.length) {
         for (const notiEl of watchEL.notices) {
-          if (notiEl.cb) {
-            // 因为打算先把条件渲染更新了，再去做异步 options 的更新
-            // 所以现在分了两个事件数组，同步和异步分开更新
-
-            if (isFunction(notiEl.cb)) {
-              fItems[notiEl.k] = notiEl.cb(props.model);
-            }
-
-            if (isAsyncFunction(notiEl.cb)) {
-              // 记录需要还原的绑定值
-              let echoVal = null;
-              // 当这个数据是需要通过异步事件（请求）获取，然后又携带了回显赋值的时候
-              // 则记录还原值
-              if (fItems.attrs) {
-                if (checkHasBindVal(props.model[fItems.attrs.prop])) {
-                  isSkipModelNotify.value = true;
-                  echoVal = props.model[fItems.attrs.prop];
-                  props.model[fItems.attrs.prop] = null;
-                }
-              }
-
-              subsAsyncModelCenter.value.push({
-                idKey: watchEL.key,
-                k: notiEl.k,
-                cb: notiEl.cb as any,
-                prop: fItems.attrs?.prop as string,
-                // 回显值
-                echoVal,
-              });
-
-              // 清理异步回调，避免重复更新值
-              notiEl.cb = null as any;
-            }
+          if (notiEl.cb && isFunction(notiEl.cb)) {
+            fItems[notiEl.k] = notiEl.cb(props.model);
           }
         }
       }
@@ -302,22 +306,43 @@ const notifyModelEvents = () => {
   });
 };
 
-/** 允许手动修改 model 时，跳过通知的下发 */
+/** 允许手动修改 model 时，避免多余的通知消耗 */
 const isSkipModelNotify = ref(false);
+/**
+ * 只有每次都 “克隆” 出一个新的对象，才能监听到对象里面的 新旧值变化
+ * 为了识别 clearable 导致的字段被 elm 内部置为 null 的情况
+ */
+const cloneFormModel = computed(() => deepClone(props.model));
 watch(
-  props.model,
-  (val) => {
+  () => cloneFormModel.value,
+  (curModel, prevModel) => {
     if (isSkipModelNotify.value) {
       isSkipModelNotify.value = false;
       return;
     }
 
-    console.log('🏄 # props.model # val', val);
+    // 处理 null 值
+    useClearableErrorNull(props.model, prevModel);
     // 监听 model 变化，下发通知
     notifyModelEvents();
   },
   { deep: true }
 );
+/**
+ * 处理 clearable 导致的 null 值问题
+ * @param curModel 需要重新赋予正确空值类型的对象
+ * @param prevModel 此时包含异常空值 null 类型的对象
+ */
+const useClearableErrorNull = (curModel: any, prevModel: any) => {
+  for (const k in curModel) {
+    if (isNull(curModel[k])) {
+      if (prevModel[k]) {
+        isSkipModelNotify.value = true;
+        curModel[k] = isArray(prevModel[k]) ? [] : '';
+      }
+    }
+  }
+};
 
 /**
  * 接收异步事件，用来异步更新 options
@@ -325,22 +350,24 @@ watch(
 const subsAsyncModelCenter: Ref<ItemAsyncSubs[]> = ref([]);
 const notifyAsyncModelEvents = () => {
   const promiseAsync = subsAsyncModelCenter.value.map(async (el) => {
-    return el.cb().then((res) => {
+    const pmsValue = el.callback();
+
+    // 用 Promise.resolve 包裹解析一下，适配传入的 options 回调是非 Promise 的情况
+    return Promise.resolve(pmsValue).then((res) => {
       if (!res) return null;
 
       __renderFormItems.value = __renderFormItems.value.map((fItems) => {
         if (fItems.idKey === el.idKey) {
-          fItems[el.k] = {
-            options: res,
-            loading: false,
-          };
+          // 更新绑定属性
+          fItems['childAttrs'].options = res;
+          fItems['childAttrs'].loading = false;
         }
 
         return fItems;
       });
 
-      // 还原选中值
-      if (el.echoVal) {
+      // 更新完列表数据后，还原回显值
+      if (!isNull(el.echoVal)) {
         isSkipModelNotify.value = true;
         props.model[el.prop] = el.echoVal;
       }
@@ -350,37 +377,43 @@ const notifyAsyncModelEvents = () => {
   });
 
   Promise.all(promiseAsync)
-    .then((res) => {
-      console.log('🏄 # GG # .then # res', res);
+    .then(() => {
       /** res */
     })
     .catch(() => {
       /** err */
     })
     .finally(() => {
-      console.log('🏄 # GG # promiseAsync # finally');
       // 执行完后清理一下异步事件
       subsAsyncModelCenter.value.length = 0;
     });
 };
 
-const onSearchEmit = function () {
+const onSearchEmit = () => {
   emits('onSearch');
 };
-// todo 内置重置表单的方法
-const onResetEmit = function () {
+const onResetEmit = () => {
+  resetFormModel();
   emits('onReset');
+};
+/** 重置表单 */
+const resetFormModel = () => {
+  // refYeoForm.value?.clearValidate?.()
+  for (const k in cacheOriginalModel) {
+    props.model[k] = cacheOriginalModel[k];
+  }
 };
 
 defineExpose({
   refYeoForm,
+  resetFormModel,
 });
 </script>
 
 <template>
   <ElForm
-    class="yeo-form"
     ref="refYeoForm"
+    class="yeo-form"
     v-bind="$attrs"
     :model="model"
     :rules="rules"
