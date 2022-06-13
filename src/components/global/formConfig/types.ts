@@ -54,9 +54,10 @@ interface OnlyKey {
 }
 type TypeSubsOtherPush = OnlyKey & PropsNotices;
 export type TypeSubsPush = (opt: TypeSubsOtherPush) => void;
-export interface ItemAsyncSubs extends TypeSubsOtherPush {
-  cb: () => Promise<any>;
+export interface ItemAsyncSubs extends OnlyKey {
+  callback: () => Promise<any>;
   prop: string;
+  echoVal?: any;
 }
 
 export interface PropsRenderItem extends PropFormItem {
