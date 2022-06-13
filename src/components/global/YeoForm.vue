@@ -359,8 +359,8 @@ const notifyAsyncModelEvents = () => {
       __renderFormItems.value = __renderFormItems.value.map((fItems) => {
         if (fItems.idKey === el.idKey) {
           // 更新绑定属性
-          fItems['childAttrs'].options = res;
-          fItems['childAttrs'].loading = false;
+          fItems['childAttrs']!.options = res;
+          fItems['childAttrs']!.loading = false;
         }
 
         return fItems;
@@ -398,7 +398,10 @@ const onResetEmit = () => {
 };
 /** 重置表单 */
 const resetFormModel = () => {
-  // refYeoForm.value?.clearValidate?.()
+  // elm 的表单重置方法有问题，这里主要为了移除校验结果
+  refYeoForm.value?.resetFields?.();
+
+  // 这里再通过记录的表单初始值，进行重置
   for (const k in cacheOriginalModel) {
     props.model[k] = cacheOriginalModel[k];
   }

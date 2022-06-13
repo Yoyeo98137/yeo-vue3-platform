@@ -17,6 +17,10 @@ interface PropItemAttrs {
   required?: boolean;
   [propName: string]: any;
 }
+interface PropChildItemAttrs {
+  placeholder?: string;
+  [propName: string]: any;
+}
 export interface PropFormItem {
   // todo 插槽的时候或许不需要
   /** 指定要生成的表单控件，对应配置表的枚举 */
@@ -25,7 +29,7 @@ export interface PropFormItem {
   /** 通过 v-bind 继承给 el-form-item 的属性以及事件 */
   attrs?: PropItemAttrs;
   /** 通过 v-bind 继承给 具体表单控件（比如 el-input） 的属性以及事件 */
-  childAttrs?: any;
+  childAttrs?: PropChildItemAttrs;
 
   /** 具名插槽定义 */
   slotKey?: string;
