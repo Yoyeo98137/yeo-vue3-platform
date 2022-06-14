@@ -46,7 +46,7 @@ import { reactive, ref } from 'vue';
 // 又遇到了 eml 样式丢失的问题...
 // import { ElMessage } from 'element-plus';
 // import { ElNotification } from 'element-plus';
-import { TypeItemConfig } from '@/components/global/formConfig/types';
+import { TypeItemConfig } from '@/components/global/formConfig/utils/types';
 import YeoForm from '@/components/global/YeoForm.vue';
 import { emptyString } from '@/utils/ifType';
 
@@ -94,7 +94,7 @@ const yeoConfig: TypeItemConfig = [
       prop: 'userSelect',
     },
     childAttrs: {
-      placeholder: '请选择用户',
+      placeholder: '请选择请选择请选择',
     },
     options: () => todoApi(),
   },
@@ -206,9 +206,6 @@ const yeoPopupConfig: TypeItemConfig = [
       label: '名称测试：',
       prop: 'popupName',
     },
-    childAttrs: {
-      placeholder: '请输入',
-    },
     span: 20,
   },
   {
@@ -222,9 +219,6 @@ const yeoPopupConfig: TypeItemConfig = [
         validator: validateTest,
       },
     },
-    childAttrs: {
-      placeholder: '请输入',
-    },
     span: 20,
   },
   {
@@ -232,9 +226,6 @@ const yeoPopupConfig: TypeItemConfig = [
     attrs: {
       label: '选择测试：',
       prop: 'popupSelect',
-    },
-    childAttrs: {
-      placeholder: '请选择',
     },
     span: 20,
     options: () => todoPopupApi(),
@@ -245,7 +236,6 @@ const yeoPopupConfig: TypeItemConfig = [
       label: '单选测试：',
       prop: 'popupRadio',
     },
-
     options: () => [
       { label: '男', value: 1 },
       { label: '女', value: 2 },
@@ -258,6 +248,7 @@ const yeoPopupConfig: TypeItemConfig = [
     // },
     isRender: (model) => model.popupRadio === 1,
     slotKey: 'slotTest',
+    // original: true
   },
 ];
 
