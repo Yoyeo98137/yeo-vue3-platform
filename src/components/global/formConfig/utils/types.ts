@@ -15,7 +15,13 @@ interface PropItemAttrs {
   prop: string;
   label?: string;
   required?: boolean;
+  rules?: PropsItemRules;
   [propName: string]: any;
+}
+interface PropsItemRules {
+  trigger?: 'blur' | 'change';
+  required?: boolean;
+  validator?: any;
 }
 interface PropChildItemAttrs {
   placeholder?: string;
@@ -37,8 +43,15 @@ export interface PropFormItem {
   span?: number;
 
   /**
-   * 列表数据项，应用于如 Checkbox、Radio、Select
-   * PS：[] | () => data | async () => await getData()
+   * 允许自定义的组合 插槽节点、el-form-item容器节点
+   * 通过开启这个字段来跳过内置的 el-form-item 包裹逻辑
+   * 仅应该配合 slotKey 的场景来使用
+   */
+  original?: boolean;
+
+  /**
+   * 动态读取列表数据项
+   * 支持 普通数组、返回数组的普通函数、返回 Promise 的异步函数
    */
   options?: Array<propOptions> | (() => void) | (() => Promise<any>);
 
@@ -50,8 +63,6 @@ export interface PropFormItem {
 }
 
 export type TypeItemConfig = Array<PropFormItem>;
-
-//
 
 interface OnlyKey {
   idKey: symbol;

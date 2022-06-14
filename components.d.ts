@@ -25,6 +25,7 @@ declare module 'vue' {
     YDydComplexData: typeof import('./src/components/global/formConfig/YDydComplexData.vue')['default']
     YDydComplexInput: typeof import('./src/components/global/formConfig/YDydComplexInput.vue')['default']
     YDydFormCol: typeof import('./src/components/global/formConfig/YDydFormCol.vue')['default']
+    YDydFormItem: typeof import('./src/components/global/formConfig/YDydFormItem.vue')['default']
     YDydNumberInput: typeof import('./src/components/global/formConfig/YDydNumberInput.vue')['default']
     YDydRadio: typeof import('./src/components/global/formConfig/YDydRadio.vue')['default']
     YDydSelect: typeof import('./src/components/global/formConfig/YDydSelect.vue')['default']

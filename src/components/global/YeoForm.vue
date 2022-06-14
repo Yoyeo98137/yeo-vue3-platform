@@ -2,6 +2,7 @@
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, shallowRef, useAttrs, watch } from 'vue';
 import YDydFormCol from './formConfig/YDydFormCol.vue';
+import YDydFormItem from './formConfig/YDydFormItem.vue';
 import {
   TypeElmForm,
   PropsRenderItem,
@@ -10,8 +11,8 @@ import {
   TypeSubsPush,
   TypeRenderItemConfig,
   PropsWatchEvents,
-} from './formConfig/types';
-import { chilldConfig, KeyChildConfig } from './formConfig/chilldConfig';
+} from './formConfig/utils/types';
+import { chilldConfig, KeyChildConfig } from './formConfig/utils/chilldConfig';
 import {
   isArray,
   isFunction,
@@ -448,7 +449,7 @@ defineExpose({
           :span="fItems.span || 24"
           :original="attrsIsInLine"
         >
-          <ElFormItem v-bind="fItems.attrs || {}">
+          <YDydFormItem v-bind="fItems.attrs || {}" :original="fItems.original">
             <!-- Slots -->
             <template v-if="fItems.slotKey">
               <slot :name="fItems.slotKey" :model="props.model"></slot>
@@ -462,7 +463,7 @@ defineExpose({
                 v-bind="fItems.childAttrs || {}"
               />
             </template>
-          </ElFormItem>
+          </YDydFormItem>
         </YDydFormCol>
       </template>
 
