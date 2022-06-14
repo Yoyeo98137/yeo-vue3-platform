@@ -30,6 +30,8 @@ interface Props extends TypeElmForm {
   model: any;
   rules?: any;
 
+  /** 是否根据 label 自动填充 placeholder */
+  autoFillPlaceholder?: boolean;
   /** 控制 Layout Row - gutter */
   gutter?: number;
 
@@ -45,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
     return {};
   },
 
+  autoFillPlaceholder: true,
   gutter: 20,
 
   search: false,
@@ -63,6 +66,10 @@ const attrsIsInLine = ref(!isUndefined(attrs.inline));
 
 /** 保留 model 的初始值 */
 let cacheOriginalModel: any = null;
+const autoFillPlaceholderEnum: any = {
+  input: '请输入',
+  select: '请选择',
+};
 const refYeoForm = ref<TypeElmForm>();
 // 处理渲染 el-form-item
 const __renderFormItems: Ref<TypeRenderItemConfig> = shallowRef([]);
@@ -111,6 +118,18 @@ const computeFormItem = (formItem: PropsRenderItem) => {
 
   if (!basicItem) throw new Error(`配置了不存在的组件类型 tag: ${tag}`);
   item.tag = basicItem.component;
+
+  // 自动识别填补常规的 placeholder
+  if (props.autoFillPlaceholder && autoFillPlaceholderEnum[tag]) {
+    let safeLabel = '';
+    if (item.attrs?.label) {
+      // 消除 label 自带的冒号
+      const regex = /[:：]$/g;
+      safeLabel = item.attrs.label.replace(regex, '');
+    }
+
+    basicItem.baseAttrs.placeholder = `${autoFillPlaceholderEnum[tag]}${safeLabel}`;
+  }
 
   const { config } = resetComplexConfig(item, tag);
   const getOptions = setingOptions(item, tag);
