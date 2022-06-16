@@ -27,7 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { ElMessage } from 'element-plus';
 import { useRequest } from '@/hooks';
 
 // const getNowTimer = () => {
@@ -49,13 +50,17 @@ const todoHandle = (title: string, subTitle: string) => {
     // }, 322)
   });
 };
+const isReady = ref(false);
 const handleRun = () => {
+  // isReady.value = true;
   // refresh()
   run('runTitle', 'runSubTitle');
 };
 const configRefresh = ref();
 const { data, loading, run, refresh } = useRequest(todoHandle, {
   defaultParams: ['handleTitle', 'handleSubTitle'],
+  // ready: isReady,
+  // manual: true,
   // refreshDeps: [configRefresh],
   // loadingDelay: 500,
 });
@@ -72,7 +77,10 @@ const handleSRun = (id: number) => {
   sRun(id);
 };
 const showMessage = (msg: string) => {
-  console.log('🏄 # showMessage # msg', msg);
+  ElMessage({
+    message: msg,
+    type: 'success',
+  });
 };
 const userStatus = (userId: number) => {
   return new Promise<string>((resolve) => {

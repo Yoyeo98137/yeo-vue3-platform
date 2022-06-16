@@ -10,9 +10,8 @@ export type BaseOptions<Q, P extends unknown[]> = {
   defaultParams?: P;
   /** 通过设置延迟的毫秒数，可以延迟 loading 变成 true 的时间，有效防止闪烁。 */
   loadingDelay?: number;
-
-  // todo
-  // ready?: Ref<boolean>
+  /** 请求等待依赖，当其值为 false 时，请求永远都不会发出 */
+  ready?: Ref<boolean>;
 
   /** 依赖刷新数组 */
   refreshDeps?: WatchSource<any>[];

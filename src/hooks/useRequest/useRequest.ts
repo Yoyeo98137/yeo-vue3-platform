@@ -18,8 +18,15 @@ import { useSingleQuery } from './useSingleQuery';
  * - [x] 延迟 loadingDelay
  * - [x] 依赖刷新 refreshDeps
  * - [x] 并发请求控制
+ * - [x] 请求等待依赖 ready
+ *       所谓等待，应该是期望在请求发起之前，先暂停一会，等待某个执行完毕 即返回 true
+ *       两个场景：
+ *       - 当 manual=false 自动请求模式时，每次 ready 从 false 变为 true 时，都会自动发起请求，会带上参数 options.defaultParams。
+ *       - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
+ *       - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
  * - [ ] 节流
  * - [ ] 防抖
+ * - [ ] 关闭请求 cancel
  * - [ ] usePagination 迁移
  * - [ ] useTable 迁移
  */
@@ -55,6 +62,8 @@ export function useRequest<TQuery, TParams extends unknown[]>(
     defaultParams = [] as unknown as TParams,
     loadingDelay = 0,
     refreshDeps = [],
+
+    ready = ref(true),
 
     queryKey,
     ...rest
@@ -98,7 +107,16 @@ export function useRequest<TQuery, TParams extends unknown[]>(
     }
   );
 
+  /** 记录等待依赖参数 */
+  const tempReadyParams = ref() as Ref<TParams>;
+
   const run = (...args: TParams) => {
+    // wait ready state.
+    if (!ready.value) {
+      tempReadyParams.value = args;
+      return;
+    }
+
     // set Key.
     const newQueryKey = queryKey?.(...args) ?? QUERY_DEFAULT_KEY;
     if (!queries[newQueryKey]) {
@@ -130,6 +148,18 @@ export function useRequest<TQuery, TParams extends unknown[]>(
     run(...defaultParams);
     isAutoRunFlag.value = false;
   }
+
+  // 监听等待依赖变化，然后重新发起请求
+  watch(ready, (val) => {
+    if (val && tempReadyParams.value) {
+      latestQuery.value.run(...tempReadyParams.value);
+    }
+  });
+  // @see: https://v3.cn.vuejs.org/api/instance-methods.html#watch
+  // @see: https://github.com/AttoJS/vue-request/blob/0df0977c74c83301ad092554642dccb07420f011/src/core/useAsyncQuery.ts#L219
+  // 有一个关于 watch 的配置应用 flush: 'sync'
+  // vue 的文档是这么介绍的：“这将强制效果始终同步触发。然而，这是低效的，应该很少需要。”
+  // 猜测大概是防止异步的 ready 变化导致逻辑错误的处理，在后面补充 asyncRun 的时候再调试
 
   // 依赖刷新，相当于基于 watch 监听响应式对象的语法糖
   if (refreshDeps.length) {
