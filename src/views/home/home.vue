@@ -6,6 +6,9 @@
   <ElButton type="primary" size="large" @click="handleJump('moreRequest')">Go to /MoreRequest</ElButton>
   <ElButton type="primary" size="large" @click="handleJump('paginationRequest')">Go to /PaginationRequest</ElButton>
 
+  <!-- useRequest -->
+  <ElButton type="primary" size="large" @click="handleJump('demo')">Go to /demo</ElButton>
+
   <!-- Axios -->
   <ElButton type="primary" size="large" @click="handleJump('demoHttp')">Go to /demoHttp</ElButton>
 
