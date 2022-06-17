@@ -22,7 +22,7 @@ import {
   isUndefined,
   notEmptyObject,
 } from '@/utils/ifType';
-import deepClone from '@/utils/lodash/clone';
+import { deepClone } from '@/utils/lodash';
 
 // Types.
 
