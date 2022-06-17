@@ -16,6 +16,9 @@ export type BaseOptions<Q, P extends unknown[]> = {
   /** 依赖刷新数组 */
   refreshDeps?: WatchSource<any>[];
 
+  debounceInterval?: number;
+  throttleInterval?: number;
+
   /**
    * 根据 params 去指定当前请求的唯一标识，设置唯一标识之后，
    * 可以用过 queries 来维护不同请求下的响应状态

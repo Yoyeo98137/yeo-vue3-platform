@@ -25,9 +25,9 @@ import { useSingleQuery } from './useSingleQuery';
  *       - 当 manual=false 自动请求模式时，每次 ready 从 false 变为 true 时，都会自动发起请求，会带上参数 options.defaultParams。
  *       - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
  *       - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
- * - [ ] 节流
- * - [ ] 防抖
- * - [ ] 关闭请求 cancel
+ * - [ ] 维护响应式参数 params
+ * - [x] 节流
+ * - [x] 防抖
  * - [ ] usePagination 迁移
  * - [ ] useTable 迁移
  */
@@ -135,8 +135,6 @@ export function useRequest<TQuery, TParams extends unknown[]>(
     return latestQuery.value.run(...args);
   };
 
-  // todo cancel
-  // const cancel = () =>
   const refresh = () => latestQuery.value.refresh();
 
   // init Run.

@@ -2,6 +2,8 @@ import type { Ref } from 'vue';
 import { ref } from 'vue';
 import type { Service, Config, SingleQueryResult } from './types';
 import { resolvedPromise } from './index';
+import { isNull } from '@/utils/ifType';
+import { debounce, throttle } from '@/utils/lodash';
 
 export function useSingleQuery<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
@@ -14,8 +16,16 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
   const params = ref([]) as unknown as Ref<TParams>;
 
   // init Config.
-  const { loadingDelay, isAutoRunFlag, onBefore, onSuccess, onError, onAfter } =
-    config;
+  const {
+    loadingDelay,
+    isAutoRunFlag,
+    throttleInterval = null,
+    debounceInterval = null,
+    onBefore,
+    onSuccess,
+    onError,
+    onAfter,
+  } = config;
 
   const delayLoadingTimer = ref();
   /** 统一清理定时器 */
@@ -37,13 +47,15 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
       .then((res) => {
         console.log('🏄 #### service #### res', res);
         data.value = res;
-
+        error.value = undefined;
         // hooks onSuccess.
         onSuccess?.(res, args);
         return resolvedPromise;
       })
       .catch((err) => {
         console.log('🏄 #### service #### err', err);
+        data.value = undefined;
+        error.value = err;
         // hooks onError.
         onError?.(err, args);
         return resolvedPromise;
@@ -58,24 +70,31 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
         onAfter?.(args);
       });
   };
-  const run = (...args: TParams) => {
-    // throttle
-    // debounce
-    // queryCount
-    // ...
 
+  // 定义 防抖/节流 函数载体
+  const debouncedRun =
+    !isNull(debounceInterval) && debounce(__run, debounceInterval!);
+  const throttledRun =
+    !isNull(throttleInterval) && throttle(__run, throttleInterval!);
+
+  const run = (...args: TParams) => {
+    // clear.
     clearTimerAll();
 
     // initial auto run should not debounce
-    if (!isAutoRunFlag.value) {
-      //
+    if (!isAutoRunFlag.value && debouncedRun) {
+      debouncedRun(...args);
+      return resolvedPromise;
+    }
+
+    if (throttledRun) {
+      throttledRun(...args);
+      return resolvedPromise;
     }
 
     return __run(...args);
   };
 
-  // todo cancel
-  // const cancel = () =>
   const refresh = () => run(...params.value);
 
   /** 检测是否开启加载延迟 */
