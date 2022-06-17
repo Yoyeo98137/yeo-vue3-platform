@@ -1,9 +1,7 @@
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 import type { Service, Config, SingleQueryResult } from './types';
-
-// 提供通用的 Promise 抛出，以此允许再进行链式操作
-const resolvedPromise = Promise.resolve(null);
+import { resolvedPromise } from './index';
 
 export function useSingleQuery<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
@@ -76,9 +74,9 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
     return __run(...args);
   };
 
-  const refresh = () => {
-    return run(...params.value);
-  };
+  // todo cancel
+  // const cancel = () =>
+  const refresh = () => run(...params.value);
 
   /** 检测是否开启加载延迟 */
   const checkDelayLoading = () => {

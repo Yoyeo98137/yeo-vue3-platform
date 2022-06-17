@@ -8,6 +8,7 @@ import type {
   BaseResult,
   UnWrapState,
 } from './types';
+import { QUERY_DEFAULT_KEY, resolvedPromise } from './index';
 import { useSingleQuery } from './useSingleQuery';
 
 /**
@@ -30,9 +31,6 @@ import { useSingleQuery } from './useSingleQuery';
  * - [ ] usePagination 迁移
  * - [ ] useTable 迁移
  */
-
-// default Key.
-const QUERY_DEFAULT_KEY = '__QUERY_DEFAULT_KEY__';
 
 export function useRequest<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>
