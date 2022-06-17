@@ -80,3 +80,27 @@ export interface BaseResult<R, P extends unknown[]> extends QueryStatus<R, P> {
   /** 提供并发请求的状态管理 */
   queries: Queries<R, P>;
 }
+
+// -----------
+
+/**
+ * [page | pageSize | total]
+ *
+ * @interface TablePageVal
+ * @description 要保证 total 的输入来渲染分页、初始化为 0
+ */
+export interface TablePageVal {
+  page: number;
+  pageSize: number;
+  total: number;
+
+  /** 补充给后台的识别字段 */
+  limit?: number;
+}
+export interface PropPaginationPlus extends TablePageVal {
+  updatePagination: (pageInfo: TablePageVal) => void;
+}
+export interface ResultPagination<TData, TParams extends unknown[]>
+  extends BaseResult<TData, TParams> {
+  pagination: PropPaginationPlus;
+}

@@ -1,63 +1,48 @@
-import { reactive } from "vue"
-import { useRequest } from "../useRequest"
-
-import {
+import { reactive } from 'vue';
+import type {
   Service,
-  Options,
+  BaseOptions,
+  BaseResult,
   PropPaginationPlus,
-  ResultPagination,
   TablePageVal,
-} from "../types"
-import merge from "@/utils/lodash/merge"
+} from '../useRequest/types';
+import { merge } from '@/utils/lodash';
+import { useRequest } from '../useRequest';
+import { unRefParams } from '../useRequest/useSingleQuery';
+
+interface PaginationResult<Q, R extends unknown[]> extends BaseResult<Q, R> {
+  pagination: any;
+}
 
 /**
  * usePagination
  * @description 通用分页、集成 useRequest
  */
-export function usePagination<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>
-): ResultPagination<TData, TParams>
-export function usePagination<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>,
-  options: Options<TData, TParams>
-): ResultPagination<TData, TParams>
-export function usePagination<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>,
-  options?: Options<TData, TParams>
+export function usePagination<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>
+): PaginationResult<TQuery, TParams>;
+export function usePagination<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>,
+  options: BaseOptions<TQuery, TParams>
+): PaginationResult<TQuery, TParams>;
+export function usePagination<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>,
+  options?: BaseOptions<TQuery, TParams>
 ) {
-  const mergePaginationParams = (...args: TParams) => {
-    runPagination(
-      /* @ts-ignore */
-      merge(
-        {
-          page: bindPagination.page,
-          limit: bindPagination.limit,
-        },
-        // 合并 分页之外 的参数
-        ...((args ?? []) as any[])
-      )
-    )
-  }
-  /** 设置分页，发出新请求 */
-  const setPagination = (page: number, pageSize: number) => {
-    bindPagination.page = page
-    bindPagination.pageSize = bindPagination.limit = pageSize
-
-    // Merge Params
-    mergePaginationParams(...(restOptions.defaultParams ?? []) as TParams)
-  }
-
-  /** 收到分页切换回调 */
+  /** 收到分页切换回调，重新合并参数并发起请求 */
   const updatePagination = (pageInfo: TablePageVal) => {
-    const { page, pageSize } = pageInfo
-    console.log("🏄 #### updatePagination #### pageInfo", pageInfo)
+    // 同步 limit
+    pageInfo.limit = pageInfo.pageSize;
 
-    // step
-    // 1. 页码更新 触发回调
-    // 2. 更新分页信息（页码）
-    // 3. 携带更新参数，重新发起分页请求
-    setPagination(page, pageSize)
-  }
+    const otherRes = unRefParams(...cacheParams);
+    const [, ...restParams] = params.value as TParams[];
+    // todo 扩张参数必须具有元组类型或传递给 rest 参数。ts(2556)
+    // @ts-ignore
+    const updateParams = merge(...otherRes, pageInfo);
+    const mergePrams = [updateParams, ...restParams] as TParams;
+
+    run(...mergePrams);
+  };
 
   // *Init pagination
   const bindPagination: PropPaginationPlus = reactive({
@@ -66,20 +51,23 @@ export function usePagination<TData, TParams extends unknown[]>(
     limit: 10,
     total: 0,
     updatePagination,
-  })
+  });
 
+  // todo
   /** 分页请求完成 更新 total */
   const successPagination = (res: any) => {
-    console.log("🏄 #### successPagination #### res", res)
+    const { info = {} } = res;
+    const { page = {}, result = [] } = info;
+    const { totalCount = result.length } = page;
+    bindPagination.total = totalCount;
+  };
 
-    // Set Total...
-    const { info = {} } = res
-    const { page = {}, result = [] } = info
-    const { totalCount = result.length } = page
-    bindPagination.total = totalCount
-  }
+  const { ...restOptions } = options ?? {};
+  const cacheParams = (restOptions.defaultParams ?? []) as TParams;
 
-  const { ...restOptions } = options ?? {}
+  console.log('🏄 #### restOptions', restOptions);
+  console.log('🏄 #### cacheParams', cacheParams);
+
   // *Merge options
   const finallyOptions = merge(
     {
@@ -90,22 +78,19 @@ export function usePagination<TData, TParams extends unknown[]>(
           limit: 10,
         },
       ],
-      paginationModel: bindPagination,
-      onSuccess: successPagination,
+      // paginationModel: bindPagination,
+      // onSuccess: successPagination,
     },
     restOptions
-  )
-  console.log("🏄 #### finallyOptions", finallyOptions)
+  );
 
-  // *Run request
-  const {
-    run: runPagination,
-    // 保留剩余的导出，再提供出去
-    ...rest
-  } = useRequest(service, finallyOptions)
+  console.log('🏄 #### usePagination #### finallyOptions', finallyOptions);
+
+  const { run, params, queries, ...rest } = useRequest(service, finallyOptions);
 
   return {
+    run,
     pagination: bindPagination,
     ...rest,
-  }
+  };
 }

@@ -1,9 +1,26 @@
-import type { Ref } from 'vue';
-import { ref } from 'vue';
+import { ref, isReactive, Ref, toRefs, unref } from 'vue';
 import type { Service, Config, SingleQueryResult } from './types';
 import { resolvedPromise } from './index';
 import { isNull } from '@/utils/ifType';
-import { debounce, throttle } from '@/utils/lodash';
+import { merge, debounce, throttle } from '@/utils/lodash';
+
+/**
+ * 将传入的响应式变量，转成可直接使用的普通变量
+ * toRefs：将响应式对象转换为普通对象，其中结果对象的每个 property 都是指向原始对象相应 property 的 ref。
+ * unref：如果参数是一个 ref，则返回内部值，否则返回参数本身。这是 val = isRef(val) ? val.value : val 的语法糖函数。
+ */
+export const unRefParams = (...args: unknown[]) => {
+  return args.map((ea) => {
+    if (isReactive(ea)) {
+      // reactive > toRefs > [ref].value
+      const res = Object.entries(toRefs(ea as object)).map((cea) => ({
+        [cea[0]]: cea[1].value,
+      }));
+      // merge Array > Object
+      return res.reduce((prev: any, curr: any) => merge(prev, curr));
+    } else return unref(ea);
+  });
+};
 
 export function useSingleQuery<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
@@ -38,14 +55,14 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
     loading.value = !loadingDelay;
     delayLoadingTimer.value = checkDelayLoading();
 
-    // 同步调用参数
-    params.value = args;
     // hooks onBefore.
     onBefore?.(args);
+    console.log('🏄 # last # __run # args', args);
 
     return service(...args)
       .then((res) => {
         console.log('🏄 #### service #### res', res);
+
         data.value = res;
         error.value = undefined;
         // hooks onSuccess.
@@ -54,6 +71,7 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
       })
       .catch((err) => {
         console.log('🏄 #### service #### err', err);
+
         data.value = undefined;
         error.value = err;
         // hooks onError.
@@ -81,18 +99,25 @@ export function useSingleQuery<TQuery, TParams extends unknown[]>(
     // clear.
     clearTimerAll();
 
+    // 接收转换后的普通参数对象
+    const transformArgs = unRefParams(...args) as TParams;
+    // 保留原始的 args，以供后续计算
+    params.value = args;
+    console.log('🏄 #### run #### params.value', params.value);
+    console.log('🏄 #### run #### transformArgs', transformArgs);
+
     // initial auto run should not debounce
     if (!isAutoRunFlag.value && debouncedRun) {
-      debouncedRun(...args);
+      debouncedRun(...transformArgs);
       return resolvedPromise;
     }
 
     if (throttledRun) {
-      throttledRun(...args);
+      throttledRun(...transformArgs);
       return resolvedPromise;
     }
 
-    return __run(...args);
+    return __run(...transformArgs);
   };
 
   const refresh = () => run(...params.value);

@@ -1,5 +1,4 @@
-import type { Ref } from 'vue';
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, Ref, reactive, computed, watch } from 'vue';
 import type {
   Service,
   Queries,
@@ -25,7 +24,7 @@ import { useSingleQuery } from './useSingleQuery';
  *       - 当 manual=false 自动请求模式时，每次 ready 从 false 变为 true 时，都会自动发起请求，会带上参数 options.defaultParams。
  *       - 当 manual=true 手动请求模式时，只要 ready=false，则通过 run/runAsync 触发的请求都不会执行。
  *       - 参考 @ses: https://ahooks.gitee.io/zh-CN/hooks/use-request/ready
- * - [ ] 维护响应式参数 params
+ * - [x] 维护响应式参数 params
  * - [x] 节流
  * - [x] 防抖
  * - [ ] usePagination 迁移
@@ -112,7 +111,7 @@ export function useRequest<TQuery, TParams extends unknown[]>(
     // wait ready state.
     if (!ready.value) {
       tempReadyParams.value = args;
-      return;
+      return resolvedPromise;
     }
 
     // set Key.
@@ -126,8 +125,7 @@ export function useRequest<TQuery, TParams extends unknown[]>(
         reactive(useSingleQuery(service, config))
       );
     }
-    // console.log("🏄 #### run #### queries", queries)
-    // Update: latestQueryKey - latestQuery - latestQuery.value.run
+    // Update: latestQueryKey > latestQuery > latestQuery.value.run
     // 否则更新的一直是 queries["QUERY_DEFAULT_KEY"] 对象里面的状态值，而不是某个 queryKey() 识别的状态值
     latestQueryKey.value = newQueryKey;
 
