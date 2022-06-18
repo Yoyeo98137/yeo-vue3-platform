@@ -28,7 +28,7 @@ import { useSingleQuery } from './useSingleQuery';
  * - [x] 节流
  * - [x] 防抖
  * - [x] usePagination 迁移
- * - [ ] useTable 迁移
+ * - [x] useTable 迁移
  * - [ ] 文档补充
  */
 

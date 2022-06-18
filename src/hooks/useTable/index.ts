@@ -1,69 +1,59 @@
-
-import { computed, Ref } from "vue"
-import { isFunction } from "@/utils/ifType"
-import { Service, Options, ResultPagination } from "../types"
-import { usePagination } from "../usePagination"
+import { computed, Ref } from 'vue';
+import type {
+  Service,
+  BaseOptions,
+  ResultPagination,
+} from '../useRequest/types';
+import { usePagination } from '../usePagination';
+import { isFunction } from '@/utils/ifType';
 
 interface OptionsTable<TData, TParams extends unknown[]>
-  extends Options<TData, TParams> {
+  extends BaseOptions<TData, TParams> {
   /** 允许重新定制表格 */
-  reRender?: (ele: any, index: any) => void
+  reRender?: (ele: any, index: any) => void;
 }
 interface ResultTable<TData, TParams extends unknown[]>
   extends ResultPagination<TData, TParams> {
-  list: Ref<any[]>
+  tableData: Ref<any[]>;
 }
 
 /**
  * useTable
  * @description 通用表格、集成分页 请求
  */
-export function useTable<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>
-): ResultTable<TData, TParams>
-export function useTable<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>,
-  options: OptionsTable<TData, TParams>
-): ResultTable<TData, TParams>
-export function useTable<TData, TParams extends unknown[]>(
-  service: Service<TData, TParams>,
-  options?: OptionsTable<TData, TParams>
+export function useTable<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>
+): ResultTable<TQuery, TParams>;
+export function useTable<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>,
+  options: OptionsTable<TQuery, TParams>
+): ResultTable<TQuery, TParams>;
+export function useTable<TQuery, TParams extends unknown[]>(
+  service: Service<TQuery, TParams>,
+  options?: OptionsTable<TQuery, TParams>
 ) {
-  const { reRender } = options ?? {}
+  const { reRender } = options ?? {};
 
-  // Set request
-  const {
-    data,
-    // 保留剩余的导出，再提供出去
-    ...rest
-  } = usePagination(service, options!)
-
-  // Init/Update table-list
-  const list: Ref<any[]> = computed(() => {
-    let res: any = []
-
-    console.log("🏄 #### computed #### list #### data", data.value)
+  // Update table-list
+  const tableData: Ref<any[]> = computed(() => {
+    let res: any = [];
 
     if (data.value) {
-      const { info = {} } = data
-      const { result = [] } = info
+      const { info = {} } = data as any;
+      const { result = [] } = info;
 
-      // 重新处理数据格式
+      // 基于我们接口的分页-表格结构，重新处理数据格式
       if (isFunction(reRender)) {
-        res = result.map((ele: any, index: any) =>
-          // todo
-          /* @ts-ignore */
-          reRender(ele, index)
-        )
-      } else res = result
+        res = result.map((ele: any, index: any) => reRender?.(ele, index));
+      } else res = result;
     }
 
-    return res
-  })
-
+    return res;
+  });
+  const { data, ...rest } = usePagination(service, options ?? {});
 
   return {
-    list,
+    tableData,
     ...rest,
-  }
+  };
 }

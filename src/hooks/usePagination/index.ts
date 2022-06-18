@@ -2,7 +2,7 @@ import { reactive } from 'vue';
 import type {
   Service,
   BaseOptions,
-  BaseResult,
+  ResultPagination,
   PropPaginationPlus,
   TablePageVal,
 } from '../useRequest/types';
@@ -10,21 +10,17 @@ import { merge } from '@/utils/lodash';
 import { useRequest } from '../useRequest';
 import { unRefParams } from '../useRequest/useSingleQuery';
 
-interface PaginationResult<Q, R extends unknown[]> extends BaseResult<Q, R> {
-  pagination: PropPaginationPlus;
-}
-
 /**
  * usePagination
  * @description 通用分页、集成 useRequest
  */
 export function usePagination<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>
-): PaginationResult<TQuery, TParams>;
+): ResultPagination<TQuery, TParams>;
 export function usePagination<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
   options: BaseOptions<TQuery, TParams>
-): PaginationResult<TQuery, TParams>;
+): ResultPagination<TQuery, TParams>;
 export function usePagination<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
   options?: BaseOptions<TQuery, TParams>
@@ -105,9 +101,9 @@ export function usePagination<TQuery, TParams extends unknown[]>(
     },
     restOptions
   );
-
   console.log('🏄 #### usePagination #### finallyOptions', finallyOptions);
 
+  // usePagination 不支持 queries - queryKey 的使用
   const { run, params, queries, ...rest } = useRequest(service, finallyOptions);
 
   return {
