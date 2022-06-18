@@ -36,14 +36,23 @@
       <div>dataPagination: {{ dataPagination || '.............' }}</div>
       <ElInput v-model="testRefVal2.val2" />
       <ElPagination
+        v-model:currentPage="pagination.page"
+        v-model:pageSize="pagination.pageSize"
+        :pageSizes="[10, 20, 30, 40]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="40"
+        @sizeChange="pagination.updatePageSize"
+        @currentChange="pagination.updatePage"
+      />
+      <!-- <ElPagination
         v-model:currentPage="currentPage"
-        v-model:page-size="pageSize"
+        v-model:pageSize="pageSize"
         :pageSizes="[10, 20, 30, 40]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="40"
         @sizeChange="handleSizeChange"
         @currentChange="handleCurrentChange"
-      />
+      /> -->
     </ElCard>
   </ElMain>
 </template>
@@ -155,22 +164,22 @@ const {
 
 // ---------------
 
-const currentPage = ref(1);
-const pageSize = ref(10);
-const handleSizeChange = (val: number) => {
-  pagination.updatePagination({
-    page: currentPage.value,
-    pageSize: pageSize.value,
-  });
-  console.log('🏄 #### handleSizeChange #### val', val);
-};
-const handleCurrentChange = (val: number) => {
-  pagination.updatePagination({
-    page: currentPage.value,
-    pageSize: pageSize.value,
-  });
-  console.log('🏄 #### handleCurrentChange #### val', val);
-};
+// const currentPage = ref(1);
+// const pageSize = ref(10);
+// const handleSizeChange = (val: number) => {
+//   pagination.updatePagination({
+//     page: currentPage.value,
+//     pageSize: pageSize.value,
+//   });
+//   console.log('🏄 #### handleSizeChange #### val', val);
+// };
+// const handleCurrentChange = (val: number) => {
+//   pagination.updatePagination({
+//     page: currentPage.value,
+//     pageSize: pageSize.value,
+//   });
+//   console.log('🏄 #### handleCurrentChange #### val', val);
+// };
 
 const todoPagination = (p2: any) => {
   // console.log('🏄 # todoPagination # p1', p1);

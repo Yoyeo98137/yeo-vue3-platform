@@ -11,7 +11,7 @@ import { useRequest } from '../useRequest';
 import { unRefParams } from '../useRequest/useSingleQuery';
 
 interface PaginationResult<Q, R extends unknown[]> extends BaseResult<Q, R> {
-  pagination: any;
+  pagination: PropPaginationPlus;
 }
 
 /**
@@ -29,6 +29,33 @@ export function usePagination<TQuery, TParams extends unknown[]>(
   service: Service<TQuery, TParams>,
   options?: BaseOptions<TQuery, TParams>
 ) {
+  const getMergePaginationParams = (pagination: any) => {
+    const otherRes = unRefParams(...cacheParams);
+    const [, ...restParams] = params.value as TParams[];
+    // todo 扩张参数必须具有元组类型或传递给 rest 参数。ts(2556)
+    // @ts-ignore
+    const updateParams = merge(...otherRes, pagination);
+    const mergePrams = [updateParams, ...restParams] as TParams;
+
+    return mergePrams;
+  };
+  const updatePage = (page: number) => {
+    bindPagination.page = page;
+
+    const upParams = getMergePaginationParams({
+      page,
+    });
+    run(...upParams);
+  };
+  const updatePageSize = (pageSize: number) => {
+    bindPagination.limit = bindPagination.pageSize = pageSize;
+
+    const upParams = getMergePaginationParams({
+      pageSize,
+      limit: pageSize,
+    });
+    run(...upParams);
+  };
   /** 收到分页切换回调，重新合并参数并发起请求 */
   const updatePagination = (pageInfo: TablePageVal) => {
     // 同步 limit
@@ -36,14 +63,8 @@ export function usePagination<TQuery, TParams extends unknown[]>(
     bindPagination.page = pageInfo.page;
     bindPagination.limit = bindPagination.pageSize = pageInfo.pageSize;
 
-    const otherRes = unRefParams(...cacheParams);
-    const [, ...restParams] = params.value as TParams[];
-    // todo 扩张参数必须具有元组类型或传递给 rest 参数。ts(2556)
-    // @ts-ignore
-    const updateParams = merge(...otherRes, pageInfo);
-    const mergePrams = [updateParams, ...restParams] as TParams;
-
-    run(...mergePrams);
+    const upParams = getMergePaginationParams(pageInfo);
+    run(...upParams);
   };
 
   // *Init pagination
@@ -52,6 +73,8 @@ export function usePagination<TQuery, TParams extends unknown[]>(
     pageSize: 10,
     limit: 10,
     total: 0,
+    updatePage,
+    updatePageSize,
     updatePagination,
   });
 

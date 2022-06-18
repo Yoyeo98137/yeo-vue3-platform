@@ -92,12 +92,14 @@ export interface BaseResult<R, P extends unknown[]> extends QueryStatus<R, P> {
 export interface TablePageVal {
   page: number;
   pageSize: number;
-  total: number;
+  total?: number;
 
   /** 补充给后台的识别字段 */
   limit?: number;
 }
 export interface PropPaginationPlus extends TablePageVal {
+  updatePage: (page: number) => void;
+  updatePageSize: (pageSize: number) => void;
   updatePagination: (pageInfo: TablePageVal) => void;
 }
 export interface ResultPagination<TData, TParams extends unknown[]>
