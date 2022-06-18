@@ -33,6 +33,8 @@ export function usePagination<TQuery, TParams extends unknown[]>(
   const updatePagination = (pageInfo: TablePageVal) => {
     // 同步 limit
     pageInfo.limit = pageInfo.pageSize;
+    bindPagination.page = pageInfo.page;
+    bindPagination.limit = bindPagination.pageSize = pageInfo.pageSize;
 
     const otherRes = unRefParams(...cacheParams);
     const [, ...restParams] = params.value as TParams[];
@@ -53,9 +55,9 @@ export function usePagination<TQuery, TParams extends unknown[]>(
     updatePagination,
   });
 
-  // todo
   /** 分页请求完成 更新 total */
   const successPagination = (res: any) => {
+    // 基于我们接口的分页结构
     const { info = {} } = res;
     const { page = {}, result = [] } = info;
     const { totalCount = result.length } = page;
@@ -63,10 +65,8 @@ export function usePagination<TQuery, TParams extends unknown[]>(
   };
 
   const { ...restOptions } = options ?? {};
+  // 保留原始的 defaultParams，主要是为了再次拿到里面可能存在的 响应式属性
   const cacheParams = (restOptions.defaultParams ?? []) as TParams;
-
-  console.log('🏄 #### restOptions', restOptions);
-  console.log('🏄 #### cacheParams', cacheParams);
 
   // *Merge options
   const finallyOptions = merge(
@@ -78,8 +78,7 @@ export function usePagination<TQuery, TParams extends unknown[]>(
           limit: 10,
         },
       ],
-      // paginationModel: bindPagination,
-      // onSuccess: successPagination,
+      onSuccess: successPagination,
     },
     restOptions
   );
@@ -90,6 +89,7 @@ export function usePagination<TQuery, TParams extends unknown[]>(
 
   return {
     run,
+    params,
     pagination: bindPagination,
     ...rest,
   };

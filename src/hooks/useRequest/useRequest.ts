@@ -27,8 +27,9 @@ import { useSingleQuery } from './useSingleQuery';
  * - [x] 维护响应式参数 params
  * - [x] 节流
  * - [x] 防抖
- * - [ ] usePagination 迁移
+ * - [x] usePagination 迁移
  * - [ ] useTable 迁移
+ * - [ ] 文档补充
  */
 
 export function useRequest<TQuery, TParams extends unknown[]>(

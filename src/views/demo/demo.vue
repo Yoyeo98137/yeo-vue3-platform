@@ -175,6 +175,8 @@ const handleCurrentChange = (val: number) => {
 const todoPagination = (p2: any) => {
   // console.log('🏄 # todoPagination # p1', p1);
   console.log('🏄 # todoPagination # p2', p2);
+  console.log('🏄 # todoPagination # pagination', pagination);
+
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(p2);
