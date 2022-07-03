@@ -11,6 +11,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
+// @ts-ignore
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
 
@@ -23,7 +24,7 @@ export default defineConfig(({ mode }) => {
       Components({
         resolvers: [ElementPlusResolver()],
       }),
-      isDev
+      !isDev
         ? visualizer({ open: true, brotliSize: true, filename: 'report.html' })
         : null,
     ],
@@ -70,10 +71,30 @@ export default defineConfig(({ mode }) => {
       //     drop_debugger: process.env.NODE_ENV === "production",
       //   },
       // },
-      // rollupOptions: {
-      //   // 确保外部化处理那些你不想打包进库的依赖
-      //   // external
-      // },
+      rollupOptions: {
+        // 确保外部化处理那些你不想打包进库的依赖
+        // external
+
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              const res = id.toString().split('node_modules/.pnpm/')[1];
+              const resNameSplit = res.split('node_modules/')[1].split('/')[0];
+              // console.log('🏄 # manualChunks # resNameSplit', resNameSplit)
+
+              switch (resNameSplit) {
+                case 'lodash':
+                case 'element-plus':
+                case '@element-plus':
+                  return resNameSplit;
+
+                default:
+                  return '__vendor';
+              }
+            }
+          },
+        },
+      },
     },
   };
 });
