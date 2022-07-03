@@ -4,3 +4,5 @@ dist
 dist-ssr
 pnpm-lock.yaml
 *.local
+
+report.html
