@@ -62,8 +62,6 @@ export interface PropFormItem {
   getChildAttrs?: (model: any) => any;
 }
 
-export type TypeItemConfig = Array<PropFormItem>;
-
 interface OnlyKey {
   idKey: symbol;
 }

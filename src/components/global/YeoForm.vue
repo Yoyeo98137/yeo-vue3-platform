@@ -6,7 +6,6 @@ import YDydFormItem from './formConfig/YDydFormItem.vue';
 import {
   TypeElmForm,
   PropsRenderItem,
-  TypeItemConfig,
   ItemAsyncSubs,
   TypeSubsPush,
   TypeRenderItemConfig,

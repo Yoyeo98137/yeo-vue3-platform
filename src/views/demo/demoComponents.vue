@@ -46,7 +46,6 @@ import { reactive, ref } from 'vue';
 // 又遇到了 eml 样式丢失的问题...
 // import { ElMessage } from 'element-plus';
 // import { ElNotification } from 'element-plus';
-import { TypeItemConfig } from '@/components/global/formConfig/utils/types';
 import YeoForm from '@/components/global/YeoForm.vue';
 import { emptyString } from '@/utils/ifType';
 
