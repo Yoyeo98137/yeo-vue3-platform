@@ -46,13 +46,12 @@ import { reactive, ref } from 'vue';
 // 又遇到了 eml 样式丢失的问题...
 // import { ElMessage } from 'element-plus';
 // import { ElNotification } from 'element-plus';
-import YeoForm from '@/components/global/YeoForm.vue';
+// import YeoForm from '@/components/global/YeoForm.vue';
+import type { FormInstance } from '@/components/global/form';
 import { emptyString } from '@/utils/ifType';
 
-type TypeYeoFormRef = InstanceType<typeof YeoForm>;
-
 // 表单 - 表格查询场景
-const refDemoForm = ref<TypeYeoFormRef>();
+const refDemoForm = ref<FormInstance>();
 const yeoModel = reactive({
   userName: '',
   userSelect: 1,
@@ -181,7 +180,7 @@ const fmReset = () => {
 
 // 表单 - 提交弹窗场景
 const dialogVisible = ref(false);
-const refDemoPopupForm = ref<TypeYeoFormRef>();
+const refDemoPopupForm = ref<FormInstance>();
 const yeoPopupModel = reactive({
   popupName: '',
   popupRuleCfg: '',

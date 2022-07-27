@@ -10,8 +10,8 @@ import {
   TypeSubsPush,
   TypeRenderItemConfig,
   PropsWatchEvents,
-} from './formConfig/utils/types';
-import { chilldConfig, KeyChildConfig } from './formConfig/utils/chilldConfig';
+} from '../formConfig/utils/types';
+import { chilldConfig, KeyChildConfig } from '../formConfig/utils/chilldConfig';
 import {
   isArray,
   isFunction,
