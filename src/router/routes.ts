@@ -5,6 +5,7 @@ import PaginationRequest from '@/views/todo/paginationRequest.vue'
 import MoreRequest from '@/views/todo/moreRequest.vue'
 import DemoHttp from '@/views/demo/demoHttp.vue'
 import DemoComponents from '@/views/demo/demoComponents.vue'
+import DemoCascader from '@/views/demo/demoCascader.vue'
 
 export const routes = [
   { path: '/', name: 'home', component: Home },
@@ -14,4 +15,5 @@ export const routes = [
   { path: '/moreRequest', name: 'moreRequest', component: MoreRequest },
   { path: '/demoHttp', name: 'demoHttp', component: DemoHttp },
   { path: '/demoComponents', name: 'demoComponents', component: DemoComponents },
+  { path: '/demoCascader', name: 'demoCascader', component: DemoCascader },
 ]

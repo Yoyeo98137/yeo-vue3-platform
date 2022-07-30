@@ -35,6 +35,11 @@
     <ElButton type="primary" size="large" @click="handleJump('demoComponents')"
       >Go to /demoComponents</ElButton
     >
+
+    <!-- Cascader -->
+    <ElButton type="primary" size="large" @click="handleJump('demoCascader')"
+      >Go to /demoCascader</ElButton
+    >
   </div>
 
   <div style="margin-top: 16px">
