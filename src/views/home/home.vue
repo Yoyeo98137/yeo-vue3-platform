@@ -1,61 +1,96 @@
 <template>
   <img alt="logo" src="@/assets/logo.png" />
 
-  <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
-  <ElButton type="primary" size="large" @click="handleJump('about')">Go to /About</ElButton>
-  <ElButton type="primary" size="large" @click="handleJump('moreRequest')">Go to /MoreRequest</ElButton>
-  <ElButton type="primary" size="large" @click="handleJump('paginationRequest')">Go to /PaginationRequest</ElButton>
+  <div class="home-btn-row">
+    <HelloWorld :msg="`Now is ${store.name} Platform 🤞`" />
+  </div>
 
-  <!-- useRequest -->
-  <ElButton type="primary" size="large" @click="handleJump('demo')">Go to /demo</ElButton>
+  <div class="home-btn-row">
+    <ElButton type="primary" size="large" @click="handleJump('about')"
+      >Go to /About</ElButton
+    >
+    <ElButton type="primary" size="large" @click="handleJump('moreRequest')"
+      >Go to /MoreRequest</ElButton
+    >
+    <ElButton
+      type="primary"
+      size="large"
+      @click="handleJump('paginationRequest')"
+      >Go to /PaginationRequest</ElButton
+    >
+  </div>
 
-  <!-- Axios -->
-  <ElButton type="primary" size="large" @click="handleJump('demoHttp')">Go to /demoHttp</ElButton>
+  <div class="home-btn-row">
+    <!-- useRequest -->
+    <ElButton type="primary" size="large" @click="handleJump('demo')"
+      >Go to /demo</ElButton
+    >
 
-  <!-- Component -->
-  <ElButton type="primary" size="large" @click="handleJump('demoComponents')">Go to /demoComponents</ElButton>
+    <!-- Axios -->
+    <ElButton type="primary" size="large" @click="handleJump('demoHttp')"
+      >Go to /demoHttp</ElButton
+    >
 
-  <div style="margin-top: 16px;">
-    <p>{{ "modelCascader - " + modelCascader }}</p>
+    <!-- Component -->
+    <ElButton type="primary" size="large" @click="handleJump('demoComponents')"
+      >Go to /demoComponents</ElButton
+    >
+  </div>
+
+  <div style="margin-top: 16px">
+    <p>{{ 'modelCascader - ' + modelCascader }}</p>
     <div class="cascader-container">
-      <ElCascader v-if="renderCascader" v-model="modelCascader" :options="optionsCascader" :props="props"
-        :showAllLevels="false" clearable collapseTags @change="onChangeCascaderr" />
+      <ElCascader
+        v-if="renderCascader"
+        v-model="modelCascader"
+        :options="optionsCascader"
+        :props="props"
+        :showAllLevels="false"
+        clearable
+        collapseTags
+        @change="onChangeCascaderr"
+      />
       <!-- loading 占位 -->
-      <div v-else v-loading="true" element-loading-text="Loading..." element-loading-svg-view-box="-10, -10, 120, 120"
-        class="cascader-seat"></div>
+      <div
+        v-else
+        v-loading="true"
+        element-loading-text="Loading..."
+        element-loading-svg-view-box="-10, -10, 120, 120"
+        class="cascader-seat"
+      ></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import HelloWorld from '@/components/HelloWorld.vue'
+import HelloWorld from '@/components/HelloWorld.vue';
 
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from "@/stores"
+import { useStore } from '@/stores';
 
 interface ModelTarget {
-  label: string
-  value: string
-  children?: Array<any>
+  label: string;
+  value: string;
+  children?: Array<any>;
 }
-type TypeModelArr = Array<ModelTarget>
-type TypeModelPromise = (val: string) => Promise<Array<any>>
+type TypeModelArr = Array<ModelTarget>;
+type TypeModelPromise = (val: string) => Promise<Array<any>>;
 
 // Note that store is an object wrapped with reactive,
 // meaning there is no need to write .value
-const store = useStore()
+const store = useStore();
 
-console.log('🏄 # store', store)
-console.log('🏄 # store', store.name)
+console.log('🏄 # store', store);
+console.log('🏄 # store', store.name);
 
 // *Test Router
-const router = useRouter()
+const router = useRouter();
 const handleJump = (rouerName: string) => {
   router.push({
     name: rouerName,
-  })
-}
+  });
+};
 
 /**
  * - [x] 单选
@@ -67,72 +102,71 @@ const handleJump = (rouerName: string) => {
 
 // *Test Cascader
 const modelToCity: any = {
-
-  "0100": [
+  '0100': [
     {
-      value: "0110",
+      value: '0110',
       label: '广州市',
-      isLeaf: false
+      isLeaf: false,
     },
     {
-      value: "0120",
+      value: '0120',
       label: '深圳市',
       isLeaf: false,
     },
     {
-      value: "0130",
+      value: '0130',
       label: '惠州市',
-      isLeaf: true
+      isLeaf: true,
     },
   ],
 
-  "0110": [
+  '0110': [
     {
-      value: "0111",
+      value: '0111',
       label: '天河区',
-      isLeaf: true
+      isLeaf: true,
     },
   ],
-  "0120": [
+  '0120': [
     {
-      value: "0121",
+      value: '0121',
       label: '南山区',
-      isLeaf: true
+      isLeaf: true,
     },
     {
-      value: "0122",
+      value: '0122',
       label: '宝安区',
-      isLeaf: true
+      isLeaf: true,
     },
   ],
 
-  "0200": [
+  '0200': [
     {
-      value: "0110",
+      value: '0110',
       label: '长沙市',
-      isLeaf: true
+      isLeaf: true,
     },
-  ]
-}
+  ],
+};
 const props = {
   lazy: true,
   multiple: true,
   lazyLoad: async (node: any, resolve: any) => {
-    const { value } = node
-    const nodes = await getModelApi(value)
+    const { value } = node;
+    const nodes = await getModelApi(value);
 
     // Invoke `resolve` callback to return the child nodes data and indicate the loading is finished.
-    console.log('🏄 # setTimeout # nodes', nodes)
-    resolve(nodes)
+    console.log('🏄 # setTimeout # nodes', nodes);
+    resolve(nodes);
   },
-}
+};
 
-const renderCascader = ref(false)
-const modelCascader: any = ref([])
-const optionsCascader: any = ref([])
+const renderCascader = ref(false);
+const modelCascader: any = ref([]);
+const optionsCascader: any = ref([]);
 const onChangeCascaderr = (val: any) => {
-  console.log('🏄 # onChangeCascaderr # val', val)
-}
+  console.log('🏄 # onChangeCascaderr # val', val);
+};
 /** 模拟接口 */
 const getModelApi: TypeModelPromise = async (val) => {
   return await new Promise((resolve) => {
@@ -140,62 +174,68 @@ const getModelApi: TypeModelPromise = async (val) => {
       const model = modelToCity[val].map((ele: any) => {
         return {
           ...ele,
-          leaf: ele.isLeaf
-        }
-      })
-      resolve(model)
+          leaf: ele.isLeaf,
+        };
+      });
+      resolve(model);
     }, 626);
-  })
-}
+  });
+};
 onMounted(async () => {
-
   // *动态回显：需要回显的选项中，存在有需要 lazyLoad 之后才有数据的选项
 
   // 保留赋值 “源数组” 的引用
-  let updateModel: TypeModelArr = []
-  const updateTarget = ["0100", "0120", "0121"]
+  let updateModel: TypeModelArr = [];
+  const updateTarget = ['0100', '0120', '0121'];
 
   // 1 初始化第一层数据
   const fstModel: TypeModelArr = [
     {
-      value: "0100",
+      value: '0100',
       label: '广东省',
     },
     {
-      value: "0200",
+      value: '0200',
       label: '湖南省',
     },
-  ]
-  updateModel = fstModel
+  ];
+  updateModel = fstModel;
 
   // 2 通过需要回显的字段，先单独读取对应的列表
   // 循环到 前一级，因为最后一级代表的是 叶子节点
-  let i = 0, curModel = updateModel
+  let i = 0,
+    curModel = updateModel;
   while (i < updateTarget.length - 1) {
-    const curTarget = updateTarget[i]
+    const curTarget = updateTarget[i];
     // 拿到 model 中要插入数据的下标
-    const findInsertIdx = curModel.findIndex(ele => ele.value === curTarget)
+    const findInsertIdx = curModel.findIndex((ele) => ele.value === curTarget);
 
     // 通过目标 “id” 读取对应接口
-    const resTarget = await getModelApi(curTarget)
+    const resTarget = await getModelApi(curTarget);
     // 插入数据
-    curModel[findInsertIdx].children = resTarget
+    curModel[findInsertIdx].children = resTarget;
 
     // 向后更新对应下标的 target
-    curModel = fstModel[findInsertIdx].children as TypeModelArr
-    i++
+    curModel = fstModel[findInsertIdx].children as TypeModelArr;
+    i++;
   }
 
   // 3 然后再插入到初始数据源 options 中（前面两部也可以先用新建对象装着，最后统一赋值）
-  optionsCascader.value = updateModel
-  modelCascader.value = ["0100", "0120", "0121"]
+  optionsCascader.value = updateModel;
+  modelCascader.value = ['0100', '0120', '0121'];
 
   // 4 最后打开级联组件渲染限制
-  renderCascader.value = true
-})
+  renderCascader.value = true;
+});
 </script>
 
-<style>
+<style lang="scss">
+.home-btn-row {
+  & + .home-btn-row {
+    margin-top: 12px;
+  }
+}
+
 .cascader-container {
   margin: 0 auto;
   width: 362px;
