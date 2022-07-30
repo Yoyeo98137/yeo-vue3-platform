@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, shallowRef, useAttrs, watch } from 'vue';
-import YDydFormCol from './formConfig/YDydFormCol.vue';
-import YDydFormItem from './formConfig/YDydFormItem.vue';
+import YDydFormCol from '../formConfig/YDydFormCol.vue';
+import YDydFormItem from '../formConfig/YDydFormItem.vue';
 import {
   TypeElmForm,
   PropsRenderItem,

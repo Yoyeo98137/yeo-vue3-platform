@@ -76,6 +76,7 @@ export default defineConfig(({ mode }) => {
         // external
 
         output: {
+          // TODO see: https://segmentfault.com/a/1190000041919468
           manualChunks(id) {
             if (id.includes('node_modules')) {
               const res = id.toString().split('node_modules/.pnpm/')[1];

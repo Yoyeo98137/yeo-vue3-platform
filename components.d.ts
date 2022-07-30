@@ -29,7 +29,7 @@ declare module 'vue' {
     YDydNumberInput: typeof import('./src/components/global/formConfig/YDydNumberInput.vue')['default']
     YDydRadio: typeof import('./src/components/global/formConfig/YDydRadio.vue')['default']
     YDydSelect: typeof import('./src/components/global/formConfig/YDydSelect.vue')['default']
-    YeoForm: typeof import('./src/components/global/YeoForm.vue')['default']
+    YeoForm: typeof import('./src/components/global/form/YeoForm.vue')['default']
   }
 }
 
