@@ -1,9 +1,11 @@
 import { InjectionKey } from 'vue';
-import type { default as CascaderNode } from './node';
+import type { CascaderOption, default as CascaderNode } from './node';
 
+export type Resolve = (dataList?: CascaderOption[]) => void;
+export type LazyLoad = (node: CascaderNode, resolve: Resolve) => void;
 export interface CascaderProps {
   lazy: boolean;
-  lazyLoad: () => void;
+  lazyLoad: LazyLoad;
 }
 export type CascaderConfig = Required<CascaderProps>;
 

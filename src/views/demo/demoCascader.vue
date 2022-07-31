@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import YeoCascader from '@/components/global/cascader';
-import type { CascaderNodePathValue } from '@/components/global/cascader';
+import type {
+  CascaderProps,
+  CascaderNodePathValue,
+} from '@/components/global/cascader';
 import { ref } from 'vue';
 
 const cascaderValue = ref('');
@@ -272,6 +275,13 @@ const cascaderOptions = [
     ],
   },
 ];
+const cascaderProps: CascaderProps = {
+  lazy: true,
+  lazyLoad: (node, resolve) => {
+    console.log('🏄 # node', node);
+    console.log('🏄 # resolve', resolve);
+  },
+};
 const changeCascader = (values: CascaderNodePathValue) => {
   console.log('');
   console.log('🏄 # -----------');
@@ -280,7 +290,10 @@ const changeCascader = (values: CascaderNodePathValue) => {
 const closeCascader = () => {
   console.log('');
   console.log('🏄 # -----------');
-  console.log('🏄 # ----------- closeCascader');
+  console.log(
+    '🏄 # ----------- closeCascader # cascaderValue',
+    cascaderValue.value
+  );
 };
 </script>
 
@@ -291,6 +304,7 @@ const closeCascader = () => {
       <YeoCascader
         v-model="cascaderValue"
         :options="cascaderOptions"
+        :props="cascaderProps"
         @change="changeCascader"
         @close="closeCascader"
       />

@@ -1,7 +1,7 @@
 <!-- Cascader container -->
 
 <script lang="ts" setup>
-import { provide, reactive, Ref, ref, watch } from 'vue';
+import { nextTick, provide, reactive, Ref, ref, watch } from 'vue';
 import YeoCascaderMenu from './menu.vue';
 
 import Node from './node';
@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emits = defineEmits<{
-  // todo update modelValue
+  (e: 'update:modelValue', value: Nullable<CascaderValue>): void;
   (e: 'change', values: CascaderNodePathValue): void;
   (e: 'close'): void;
 }>();
@@ -40,6 +40,7 @@ const leafNodes: Ref<CascaderNode[]> = ref([]);
 
 const expandingNode = ref<Nullable<CascaderNode>>();
 const checkedNodes = ref<CascaderNode[]>([]);
+const checkedValue = ref<Nullable<CascaderValue>>(null);
 
 const initStore = () => {
   /*
@@ -96,9 +97,10 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
 
   if (expandingNode.value?.uid !== newExpandingNode?.uid) {
     console.log('🏄 # ---- 触发渲染了新的展开节点');
-    expandingNode.value = node;
+
     // push next menu
     menus.value = newMenus;
+    expandingNode.value = node;
     emits('change', node?.pathValues || []);
   }
 };
@@ -114,7 +116,11 @@ const handleCheckChange: CascaderPanelContext['handleCheckChange'] = (
   node.doCheck(checked);
   calculateCheckedValue();
 
-  emitClose && emits('close');
+  // 如果没有 nextTick，close 回调的值会是 calculateCheckedValue 更新之前的 checkedValue.value
+  // 应该是事件回调时序导致的
+  nextTick(() => {
+    emitClose && emits('close');
+  });
 };
 
 const getFlattedNodes = (leafOnly: boolean) => {
@@ -131,6 +137,9 @@ const calculateCheckedValue = () => {
   const nodes = sortByOriginalChilds(oldNodes, newNodes);
   console.log('🏄 # calculateCheckedValue # nodes', nodes);
   checkedNodes.value = nodes;
+
+  const values = nodes.map((node) => node.valueByOption);
+  checkedValue.value = values[0] ?? null;
 };
 
 provide(
@@ -148,6 +157,10 @@ provide(
 watch([() => props.options], initStore, {
   deep: true,
   immediate: true,
+});
+
+watch(checkedValue, (val) => {
+  emits('update:modelValue', val);
 });
 </script>
 
