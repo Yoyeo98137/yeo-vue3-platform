@@ -11,6 +11,10 @@ export type CascaderConfig = Required<CascaderProps>;
 
 export interface CascaderPanelContext {
   expandingNode: CascaderNode;
+  lazyLoad: (
+    node?: CascaderNode,
+    cb?: (dataList: CascaderOption[]) => void
+  ) => void;
   expandNode: (node: CascaderNode) => void;
   handleCheckChange: (
     node: CascaderNode,

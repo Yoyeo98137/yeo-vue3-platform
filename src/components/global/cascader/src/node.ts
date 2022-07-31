@@ -1,6 +1,8 @@
-import { isArray } from '@/utils/ifType';
+import { isUndefined } from '@/utils/ifType';
+import { isEmpty } from './utils';
+
 import type { CascaderConfig } from './types';
-import { Nullable } from './utils';
+import type { Nullable } from './utils';
 
 export type CascaderNodeValue = string | number;
 export type CascaderNodePathValue = CascaderNodeValue[];
@@ -54,7 +56,7 @@ class Node {
 
   constructor(
     readonly data: Nullable<CascaderOption>,
-    readonly config?: CascaderConfig,
+    readonly config: CascaderConfig,
     readonly parent?: Node,
     readonly root = false
   ) {
@@ -75,22 +77,43 @@ class Node {
     this.pathValues = pathNodes.map((node) => node.value);
     this.pathLabels = pathNodes.map((node) => node.label);
 
-    // this.loaded = !config.lazy || this.isLeaf || !isEmpty(childrenData);
-    this.loaded = true;
+    // 如果开启了 lazy，则初始化的时候会先过一次 isLeaf，这时候 loaded 还没有定义所以会是 undefined
+    // 于是就会走到 isLeaf 里面的 lazy && !loaded —— false 赋值，最终计算 childrenData 后赋值给 loaded
+    this.loaded = !config.lazy || this.isLeaf || !isEmpty(childrenData);
   }
 
   get isLeaf(): boolean {
-    const { data, childrenData } = this;
-    const isLeaf =
-      !(isArray(childrenData) && childrenData.length) || data?.leaf;
+    const { data, config, childrenData, loaded } = this;
+    const { lazy } = config;
+    const isLeaf = data?.leaf;
 
-    return !!isLeaf;
+    return isUndefined(isLeaf)
+      ? lazy && !loaded
+        ? false
+        : !(Array.isArray(childrenData) && childrenData.length)
+      : !!isLeaf;
   }
 
   get valueByOption() {
     return this.value;
     // 是否需要抛出完整的值路径
     // return this.config.emitPath ? this.pathValues : this.value;
+  }
+
+  appendChild(childData: CascaderOption) {
+    const { childrenData, children } = this;
+    // 将自己作为父节点，根据自己的 childData 生成子节点
+    const node = new Node(childData, this.config, this);
+
+    // 同步更新 childrenData、children
+    if (Array.isArray(childrenData)) {
+      childrenData.push(childData);
+    } else {
+      this.childrenData = [childData];
+    }
+    children.push(node);
+
+    return node;
   }
 
   doCheck(checked: boolean) {

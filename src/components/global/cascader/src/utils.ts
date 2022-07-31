@@ -1,6 +1,12 @@
+import { isArray, isObject } from '@/utils/ifType';
 import type { default as CascaderNode } from './node';
 
 export type Nullable<T> = T | null;
+
+export const isEmpty = (val: unknown) =>
+  (!val && val !== 0) ||
+  (isArray(val) && (val as any[]).length === 0) ||
+  (isObject(val) && !Object.keys(val as Record<string, any>).length);
 
 /** 扁平目标数组 */
 export const flatNodes = (nodes: CascaderNode[], leafOnly: boolean) => {
