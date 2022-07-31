@@ -23,20 +23,27 @@ defineProps<Props>();
 <style lang="scss">
 .y-menu--scrollbar {
   height: 100%;
-  overflow: hidden;
+  overflow: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .y-menu {
   min-width: 180px;
-  color: #606266;
   border-right: 1px solid #e4e7ed;
 
-  // &:last-child {
-  //   border-right: none;
-  // }
+  &:last-child {
+    border-right: none;
+  }
 }
 
 .y-menu--scrollbar-wrap {
   overflow: auto;
+}
+
+.y-menu-wrap {
+  padding: 6px 0;
 }
 </style>
