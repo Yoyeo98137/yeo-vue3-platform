@@ -15,6 +15,8 @@ const panel = inject(CASCADER_PANEL_INJECTION_KEY)!;
 
 const isLeaf = computed(() => props.node.isLeaf);
 const isChecked = computed(() => props.node.checked);
+/** 可扩展的 —— 非叶子节点 */
+const expandable = computed(() => !isLeaf.value);
 const inExpandingPath = computed(() => isInPath(panel.expandingNode));
 
 const isInPath = (node: CascaderNode) => {
@@ -30,17 +32,27 @@ const doCheck = (checked: boolean) => {
   if (checked === node.checked) return;
   panel.handleCheckChange(node, checked);
 };
+const doLoad = () => {
+  panel.lazyLoad(props.node, () => {
+    if (!isLeaf.value) doExpand();
+  });
+};
 const doExpand = () => {
   if (inExpandingPath.value) return;
   panel.expandNode(props.node);
 };
 
 const handleCheck = (checked: boolean) => {
-  doCheck(checked);
+  if (!props.node.loaded) {
+    doLoad();
+  } else {
+    doCheck(checked);
+  }
 };
 const handleExpand = () => {
-  // node.loaded ? doExpand() : doLoad();
-  doExpand();
+  const { loading, loaded } = props.node;
+  if (!expandable.value || loading) return;
+  loaded ? doExpand() : doLoad();
 };
 
 const handleClick = () => {
@@ -65,11 +77,13 @@ const handleClick = () => {
     @click="handleClick"
   >
     <span class="y-node-label">{{ node.label }}</span>
+    <div v-show="node.loading" class="y-node-loading"></div>
   </div>
 </template>
 
 <style lang="scss">
 .y-node-content {
+  position: relative;
   padding: 0 30px 0 20px;
   display: flex;
   align-items: center;
@@ -85,6 +99,9 @@ const handleClick = () => {
     color: #409eff;
     font-weight: 700;
   }
+  &:hover {
+    background: #f5f7fa;
+  }
 
   .y-node-label {
     flex: 1;
@@ -93,6 +110,26 @@ const handleClick = () => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .y-node-loading {
+    position: absolute;
+    right: -16px;
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(122, 122, 122, 0.8);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    animation: rotation 0.72s linear infinite;
+  }
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }
 </style>
