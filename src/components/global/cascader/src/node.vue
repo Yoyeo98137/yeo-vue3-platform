@@ -19,7 +19,6 @@ const inExpandingPath = computed(() => isInPath(panel.expandingNode));
 
 const isInPath = (node: CascaderNode) => {
   const { level, uid } = props.node;
-  console.log('🏄 # isInPath # expandingNode', node);
   // 在记录的路径集查找，是否匹配的到当前的节点
   return node?.pathNodes[level - 1]?.uid === uid;
 };

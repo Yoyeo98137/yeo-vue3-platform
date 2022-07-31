@@ -42,6 +42,8 @@ class Node {
   readonly label: string;
   readonly value: CascaderNodeValue;
   readonly pathNodes: Node[];
+  readonly pathValues: CascaderNodePathValue;
+  readonly pathLabels: string[];
 
   childrenData: CascaderOption[];
   children: Node[];
@@ -57,6 +59,7 @@ class Node {
     readonly root = false
   ) {
     const childrenData = data?.children!;
+    const pathNodes = calculatePathNodes(this);
 
     this.level = root ? 0 : parent ? parent.level + 1 : 1;
     this.label = data?.label!;
@@ -68,7 +71,10 @@ class Node {
       (child) => new Node(child, config, this)
     );
 
-    this.pathNodes = calculatePathNodes(this);
+    this.pathNodes = pathNodes;
+    this.pathValues = pathNodes.map((node) => node.value);
+    this.pathLabels = pathNodes.map((node) => node.label);
+
     // this.loaded = !config.lazy || this.isLeaf || !isEmpty(childrenData);
     this.loaded = true;
   }
