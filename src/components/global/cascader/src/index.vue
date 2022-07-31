@@ -6,7 +6,7 @@ import YeoCascaderMenu from './menu.vue';
 
 import Node from './node';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
-import { flatNodes, sortByOriginalChilds } from './utils';
+import { flatNodes, isEmpty, sortByOriginalChilds } from './utils';
 
 import type {
   default as CascaderNode,
@@ -63,14 +63,58 @@ const initStore = () => {
   */
   // menus.value = props.options;
 
-  store = (props.options || []).map((node) => new Node(node));
-
+  store = (props.options || []).map((node) => new Node(node, props.props));
   allNodes.value = flatNodes(store, false);
   leafNodes.value = flatNodes(store, true);
 
   // 实际上，外面的这一层 [] 就应该代表着 parent
   menus.value = [store];
   console.log('🏄 # initStore # menus.value', menus.value);
+
+  if (props.props.lazy && isEmpty(props.options)) {
+    // initialLoaded.value = false;
+    lazyLoad(undefined, (list) => {
+      if (list) {
+        store = list.map((node) => new Node(node, props.props));
+        allNodes.value = flatNodes(store, false);
+        leafNodes.value = flatNodes(store, true);
+
+        menus.value = [store];
+      }
+    });
+  }
+};
+
+const appendNode = (nodeData: CascaderOption, parentNode?: Node) => {
+  const node = parentNode
+    ? parentNode.appendChild(nodeData)
+    : new Node(nodeData, props.props);
+
+  if (!parentNode) store?.push(node);
+
+  allNodes.value.push(node);
+  node.isLeaf && leafNodes.value.push(node);
+};
+const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
+  const cfg = props.props;
+  node! = node || new Node({}, cfg, undefined, true);
+  node.loading = true;
+
+  // 闭包
+  const resolve = (dataList: CascaderOption[]) => {
+    const _node = node as Node;
+    const parent = _node.root ? null : _node;
+
+    // dataList && store?.appendNodes(dataList, parent as any);
+    dataList && dataList.forEach((node) => appendNode(node, parent!));
+
+    _node.loading = false;
+    _node.loaded = true;
+    _node.childrenData = _node.childrenData || [];
+    cb && cb(dataList);
+  };
+  // 调用 props 定义的动态加载节点方法
+  cfg.lazyLoad(node, resolve as any);
 };
 
 const expandNode: CascaderPanelContext['expandNode'] = (node) => {
@@ -146,7 +190,7 @@ provide(
   CASCADER_PANEL_INJECTION_KEY,
   reactive({
     expandingNode,
-    // lazyLoad,
+    lazyLoad,
     expandNode,
     handleCheckChange,
   })

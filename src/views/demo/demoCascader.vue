@@ -275,13 +275,6 @@ const cascaderOptions = [
     ],
   },
 ];
-const cascaderProps: CascaderProps = {
-  lazy: true,
-  lazyLoad: (node, resolve) => {
-    console.log('🏄 # node', node);
-    console.log('🏄 # resolve', resolve);
-  },
-};
 const changeCascader = (values: CascaderNodePathValue) => {
   console.log('');
   console.log('🏄 # -----------');
@@ -295,19 +288,40 @@ const closeCascader = () => {
     cascaderValue.value
   );
 };
+
+// ----------------
+
+let id = 0;
+
+const cascaderProps: CascaderProps = {
+  lazy: true,
+  lazyLoad(node, resolve) {
+    const { level } = node;
+    setTimeout(() => {
+      const nodes = Array.from({ length: level + 1 }).map(() => ({
+        value: ++id,
+        label: `Option - ${id}`,
+        leaf: level >= 2,
+      }));
+      // console.log('🏄 # lazyLoad # nodes', nodes);
+      // Invoke `resolve` callback to return the child nodes data and indicate the loading is finished.
+      resolve(nodes);
+    }, 1000);
+  },
+};
 </script>
 
 <template>
   <ElCard class="cc-padding">
     <div>级联组件尝试</div>
     <div class="cascader-box">
-      <YeoCascader
+      <!-- <YeoCascader
         v-model="cascaderValue"
         :options="cascaderOptions"
-        :props="cascaderProps"
         @change="changeCascader"
         @close="closeCascader"
-      />
+      /> -->
+      <YeoCascader v-model="cascaderValue" :props="cascaderProps" />
     </div>
   </ElCard>
 </template>
