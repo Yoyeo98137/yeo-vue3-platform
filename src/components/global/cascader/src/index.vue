@@ -34,6 +34,7 @@ const emits = defineEmits<{
 }>();
 
 let store: Nullable<CascaderNode[]> = null;
+const initialLoaded = ref(true);
 const menus: Ref<CascaderNode[][]> = ref([]);
 const allNodes: Ref<CascaderNode[]> = ref([]);
 const leafNodes: Ref<CascaderNode[]> = ref([]);
@@ -72,7 +73,7 @@ const initStore = () => {
   console.log('🏄 # initStore # menus.value', menus.value);
 
   if (props.props.lazy && isEmpty(props.options)) {
-    // initialLoaded.value = false;
+    initialLoaded.value = false;
     lazyLoad(undefined, (list) => {
       if (list) {
         store = list.map((node) => new Node(node, props.props));
@@ -80,6 +81,7 @@ const initStore = () => {
         leafNodes.value = flatNodes(store, true);
 
         menus.value = [store];
+        initialLoaded.value = true;
       }
     });
   }
@@ -190,6 +192,7 @@ provide(
   CASCADER_PANEL_INJECTION_KEY,
   reactive({
     expandingNode,
+    initialLoaded,
     lazyLoad,
     expandNode,
     handleCheckChange,
