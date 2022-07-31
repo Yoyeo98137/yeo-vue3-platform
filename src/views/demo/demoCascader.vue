@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import YeoCascader from '@/components/global/cascader';
+import type { CascaderNodePathValue } from '@/components/global/cascader';
 import { ref } from 'vue';
 
 const cascaderValue = ref('');
@@ -271,12 +272,29 @@ const cascaderOptions = [
     ],
   },
 ];
+const changeCascader = (values: CascaderNodePathValue) => {
+  console.log('');
+  console.log('🏄 # -----------');
+  console.log('🏄 # ----------- changeCascader # values', values);
+};
+const closeCascader = () => {
+  console.log('');
+  console.log('🏄 # -----------');
+  console.log('🏄 # ----------- closeCascader');
+};
 </script>
 
 <template>
   <ElCard class="cc-padding">
     <div>级联组件尝试</div>
-    <YeoCascader v-model="cascaderValue" :options="cascaderOptions" />
+    <div class="cascader-box">
+      <YeoCascader
+        v-model="cascaderValue"
+        :options="cascaderOptions"
+        @change="changeCascader"
+        @close="closeCascader"
+      />
+    </div>
   </ElCard>
 </template>
 
@@ -284,5 +302,10 @@ const cascaderOptions = [
 .cc-padding {
   margin: 12px;
   width: 620px;
+  text-align: left;
+}
+.cascader-box {
+  margin-top: 12px;
+  display: inline-flex;
 }
 </style>
