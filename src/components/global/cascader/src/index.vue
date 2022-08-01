@@ -4,9 +4,10 @@
 import { nextTick, provide, reactive, Ref, ref, watch } from 'vue';
 import YeoCascaderMenu from './menu.vue';
 
+import Store from './store';
 import Node from './node';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
-import { flatNodes, isEmpty, sortByOriginalChilds } from './utils';
+import { isEmpty, sortByOriginalChilds } from './utils';
 
 import type {
   default as CascaderNode,
@@ -33,11 +34,9 @@ const emits = defineEmits<{
   (e: 'close'): void;
 }>();
 
-let store: Nullable<CascaderNode[]> = null;
+let store: Nullable<Store> = null;
 const initialLoaded = ref(true);
 const menus: Ref<CascaderNode[][]> = ref([]);
-const allNodes: Ref<CascaderNode[]> = ref([]);
-const leafNodes: Ref<CascaderNode[]> = ref([]);
 
 const expandingNode = ref<Nullable<CascaderNode>>();
 const checkedNodes = ref<CascaderNode[]>([]);
@@ -64,39 +63,26 @@ const initStore = () => {
   */
   // menus.value = props.options;
 
-  store = (props.options || []).map((node) => new Node(node, props.props));
-  allNodes.value = flatNodes(store, false);
-  leafNodes.value = flatNodes(store, true);
+  const { options, props: cfg } = props;
 
+  store = new Store(options, cfg);
   // 实际上，外面的这一层 [] 就应该代表着 parent
-  menus.value = [store];
+  menus.value = [store.getNodes()];
+  console.log('🏄 # initStore # store', store);
   console.log('🏄 # initStore # menus.value', menus.value);
 
-  if (props.props.lazy && isEmpty(props.options)) {
+  if (cfg.lazy && isEmpty(options)) {
     initialLoaded.value = false;
     lazyLoad(undefined, (list) => {
       if (list) {
-        store = list.map((node) => new Node(node, props.props));
-        allNodes.value = flatNodes(store, false);
-        leafNodes.value = flatNodes(store, true);
-
-        menus.value = [store];
-        initialLoaded.value = true;
+        store = new Store(list, cfg);
+        menus.value = [store.getNodes()];
       }
+      initialLoaded.value = true;
     });
   }
 };
 
-const appendNode = (nodeData: CascaderOption, parentNode?: Node) => {
-  const node = parentNode
-    ? parentNode.appendChild(nodeData)
-    : new Node(nodeData, props.props);
-
-  if (!parentNode) store?.push(node);
-
-  allNodes.value.push(node);
-  node.isLeaf && leafNodes.value.push(node);
-};
 const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
   const cfg = props.props;
   node! = node || new Node({}, cfg, undefined, true);
@@ -107,14 +93,14 @@ const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
     const _node = node as Node;
     const parent = _node.root ? null : _node;
 
-    // dataList && store?.appendNodes(dataList, parent as any);
-    dataList && dataList.forEach((node) => appendNode(node, parent!));
+    dataList && store?.appendNodes(dataList, parent!);
 
     _node.loading = false;
     _node.loaded = true;
     _node.childrenData = _node.childrenData || [];
     cb && cb(dataList);
   };
+
   // 调用 props 定义的动态加载节点方法
   cfg.lazyLoad(node, resolve as any);
 };
@@ -170,7 +156,7 @@ const handleCheckChange: CascaderPanelContext['handleCheckChange'] = (
 };
 
 const getFlattedNodes = (leafOnly: boolean) => {
-  return leafOnly ? leafNodes.value : allNodes.value;
+  return store?.getFlattedNodes(leafOnly);
 };
 const getCheckedNodes = (leafOnly: boolean) => {
   return getFlattedNodes(leafOnly)?.filter((node) => node.checked);
@@ -178,7 +164,7 @@ const getCheckedNodes = (leafOnly: boolean) => {
 const calculateCheckedValue = () => {
   const isLeafOnly = false;
   const oldNodes = checkedNodes.value;
-  const newNodes = getCheckedNodes(isLeafOnly);
+  const newNodes = getCheckedNodes(isLeafOnly)!;
   // 保证原本的节点排序，这将在多选模式下起到作用
   const nodes = sortByOriginalChilds(oldNodes, newNodes);
   console.log('🏄 # calculateCheckedValue # nodes', nodes);
