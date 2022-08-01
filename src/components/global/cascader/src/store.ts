@@ -2,7 +2,12 @@ import Node from './node';
 import { flatNodes } from './utils';
 
 import type { CascaderConfig } from './types';
-import type { CascaderOption } from './node';
+import type {
+  CascaderOption,
+  CascaderNodePathValue,
+  CascaderNodeValue,
+} from './node';
+import type { Nullable } from './utils';
 
 class Store {
   readonly nodes: Node[];
@@ -39,6 +44,33 @@ class Store {
 
   appendNodes(nodeDataList: CascaderOption[], parentNode: Node) {
     nodeDataList.forEach((nodeData) => this.appendNode(nodeData, parentNode));
+  }
+
+  /** 通过 `value` 查找节点 */
+  getNodeByValue(
+    value: CascaderNodeValue | CascaderNodePathValue,
+    leafOnly = false
+  ): Nullable<Node> {
+    // 保证 value = 0 能向后运行
+    if (!value && value !== 0) return null;
+
+    const node = this.getFlattedNodes(leafOnly).find(
+      (node) => node.value === value
+    );
+    // 多选模式下，modelValue 就是数组 —— `|| isEqual(node.pathValues, value)`
+
+    return node || null;
+  }
+
+  getSameNode(node: Node): Nullable<Node> {
+    if (!node) return null;
+
+    const node_ = this.getFlattedNodes(false).find(
+      // isEqual(node.value, value)
+      ({ value, level }) => node.value === value && node.level === level
+    );
+
+    return node_ || null;
   }
 }
 
