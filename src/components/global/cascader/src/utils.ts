@@ -3,6 +3,9 @@ import type { default as CascaderNode } from './node';
 
 export type Nullable<T> = T | null;
 
+/** new Set 去重 */
+export const unique = <T>(arr: T[]) => [...new Set(arr)];
+
 export const isEmpty = (val: unknown) =>
   (!val && val !== 0) ||
   (isArray(val) && (val as any[]).length === 0) ||

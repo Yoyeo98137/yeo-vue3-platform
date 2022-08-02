@@ -4,9 +4,12 @@ import type {
   CascaderProps,
   CascaderNodePathValue,
 } from '@/components/global/cascader';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-const cascaderValue = ref('');
+// const cascaderValue = ref('');
+// const cascaderValue = ref('guide');
+// const cascaderValue = ref('disciplines');
+const cascaderValue = ref('consistency');
 const cascaderOptions = [
   {
     value: 'guide',
@@ -276,17 +279,17 @@ const cascaderOptions = [
   },
 ];
 const changeCascader = (values: CascaderNodePathValue) => {
-  console.log('');
-  console.log('🏄 # -----------');
-  console.log('🏄 # ----------- changeCascader # values', values);
+  // console.log('');
+  // console.log('🏄 # -----------');
+  // console.log('🏄 # ----------- changeCascader # values', values);
 };
 const closeCascader = () => {
-  console.log('');
-  console.log('🏄 # -----------');
-  console.log(
-    '🏄 # ----------- closeCascader # cascaderValue',
-    cascaderValue.value
-  );
+  // console.log('');
+  // console.log('🏄 # -----------');
+  // console.log(
+  //   '🏄 # ----------- closeCascader # cascaderValue',
+  //   cascaderValue.value
+  // );
 };
 
 // ----------------
@@ -309,19 +312,42 @@ const cascaderProps: CascaderProps = {
     }, 1000);
   },
 };
+
+watch(
+  () => cascaderValue.value,
+  (val) => {
+    console.log('🏄 # watch # cascaderValue', val);
+  }
+);
+
+// const value = ref('');
+// const value = ref('guide');
+// const value = ref('disciplines');
+const value = ref('consistency');
+const handleChange = (value: string) => {
+  console.log('🏄 # handleChange # value', value);
+};
 </script>
 
 <template>
   <ElCard class="cc-padding">
     <div>级联组件尝试</div>
     <div class="cascader-box">
-      <!-- <YeoCascader
+      <YeoCascader
         v-model="cascaderValue"
         :options="cascaderOptions"
         @change="changeCascader"
         @close="closeCascader"
-      /> -->
-      <YeoCascader v-model="cascaderValue" :props="cascaderProps" />
+      />
+      <!-- <YeoCascader v-model="cascaderValue" :props="cascaderProps" /> -->
+    </div>
+    <!-- 对比 -->
+    <div class="cascader-box">
+      <el-cascader
+        v-model="value"
+        :options="cascaderOptions"
+        @change="handleChange"
+      />
     </div>
   </ElCard>
 </template>
@@ -334,6 +360,7 @@ const cascaderProps: CascaderProps = {
 }
 .cascader-box {
   margin-top: 12px;
+  width: 100%;
   display: inline-flex;
 }
 </style>

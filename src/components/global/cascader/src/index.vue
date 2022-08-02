@@ -1,18 +1,19 @@
 <!-- Cascader container -->
 
 <script lang="ts" setup>
-import { nextTick, provide, reactive, Ref, ref, watch } from 'vue';
+import { nextTick, onMounted, provide, reactive, Ref, ref, watch } from 'vue';
 import YeoCascaderMenu from './menu.vue';
 
 import Store from './store';
 import Node from './node';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
-import { isEmpty, sortByOriginalChilds } from './utils';
+import { isEmpty, sortByOriginalChilds, unique } from './utils';
 
 import type {
   default as CascaderNode,
   CascaderValue,
   CascaderOption,
+  CascaderNodeValue,
   CascaderNodePathValue,
 } from './node';
 import type { CascaderPanelContext, CascaderProps } from './types';
@@ -110,9 +111,9 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
   const newMenus = menus.value.slice(0, level);
   let newExpandingNode: Nullable<CascaderNode>;
 
-  console.log('🏄 # level', level);
-  console.log('🏄 # level - 2', level - 2);
-  console.log('🏄 # newMenus', newMenus);
+  // console.log('🏄 # level', level);
+  // console.log('🏄 # level - 2', level - 2);
+  // console.log('🏄 # newMenus', newMenus);
 
   if (node.isLeaf) {
     // 暂时没动这个 level - 2 的含义，因为走到这里则说明后续没有再对 newExpandingNode 的逻辑处理
@@ -123,9 +124,6 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
     newExpandingNode = node;
     newMenus.push(node.children);
   }
-
-  console.log('🏄 # newExpandingNode', newExpandingNode);
-  console.log('');
 
   if (expandingNode.value?.uid !== newExpandingNode?.uid) {
     console.log('🏄 # ---- 触发渲染了新的展开节点');
@@ -174,6 +172,93 @@ const calculateCheckedValue = () => {
   checkedValue.value = values[0] ?? null;
 };
 
+const syncCheckedValue = (
+  loaded = false,
+  /** "强制" */
+  forced = false
+) => {
+  const { modelValue } = props;
+  // const { lazy, multiple, checkStrictly } = config.value;
+  const leafOnly = false;
+
+  // todo lazyLoad
+
+  const values = [modelValue];
+  const nodes = unique(
+    values.map((val) =>
+      store?.getNodeByValue(val as CascaderNodeValue, leafOnly)
+    )
+  ) as Node[];
+  console.log('🏄 # syncCheckedValue # nodes', nodes);
+  console.log('🏄 # syncCheckedValue # modelValue', modelValue);
+  console.log('🏄 # syncCheckedValue # checkedValue.value', checkedValue.value);
+  console.log('');
+
+  syncMenuState(nodes, forced);
+  checkedValue.value = modelValue!;
+};
+const syncMenuState = (
+  newCheckedNodes: CascaderNode[],
+  /** "保留扩展状态" */
+  reserveExpandingState = true
+) => {
+  const oldNodes = checkedNodes.value;
+  // 只查找叶子节点，正常的逻辑就是你如果需要做回显的话，肯定是具体到某个叶子节点
+  // 而不是回显某个菜单
+  const newNodes = newCheckedNodes.filter((node) => !!node && node.isLeaf);
+  console.log('🏄 # newCheckedNodes', newCheckedNodes);
+  console.log('🏄 # syncMenuState # oldNodes', oldNodes);
+  console.log('🏄 # syncMenuState # newNodes', newNodes);
+
+  const oldExpandingNode = store?.getSameNode(expandingNode.value!);
+  const newExpandingNode = newNodes[0];
+  // const newExpandingNode =
+  //   (reserveExpandingState && oldExpandingNode) || newNodes[0];
+  console.log('🏄 # oldExpandingNode', oldExpandingNode);
+  console.log('🏄 # newExpandingNode', newExpandingNode);
+
+  if (newExpandingNode) {
+    // 将新节点路径集中所有父节点展开，从而还原路径链
+    // 而这个新节点本身是叶子节点，在 expandNode 会跳过响应的执行
+    newExpandingNode.pathNodes.forEach((node) => expandNode(node));
+  } else {
+    expandingNode.value = null;
+  }
+
+  // 复原 checked 状态，相当于补全 handleCheckChange 的逻辑
+  oldNodes.forEach((node) => node.doCheck(false));
+  newNodes.forEach((node) => node.doCheck(true));
+  checkedNodes.value = newNodes;
+};
+
+const syncCheckedValueEasy = () => {
+  console.log('🏄 # syncCheckedValueEasy # modelValue', props.modelValue);
+  console.log('🏄 # syncCheckedValueEasy # menus', menus.value);
+
+  const alls = store?.getFlattedNodes(false);
+  console.log('🏄 # syncCheckedValueEasy # alls', alls);
+
+  // 1 先找到当前要回显的节点实例
+  const node = alls?.find((node) => node.value === props.modelValue);
+  console.log('🏄 # syncCheckedValueEasy # node', node);
+
+  // 2 拷贝出节点实例内的路径集
+  const expandPaths = [...node?.pathNodes!];
+  console.log('🏄 # syncCheckedValueEasy # expandPaths', expandPaths);
+
+  // 3 计算出最深的查找路径层数
+  let maxExpand = expandPaths?.length;
+  console.log('🏄 # syncCheckedValueEasy # maxExpand', maxExpand);
+
+  // 4 一直向下查找路径，同时推出集合头部节点（父节点），触发其交互事件（展开或者点击），直到这条路径结束
+  while (maxExpand) {
+    const curNode = expandPaths?.splice(0, 1)?.[0];
+    const { isLeaf } = curNode;
+    isLeaf ? handleCheckChange(curNode, true) : expandNode(curNode);
+    maxExpand--;
+  }
+};
+
 provide(
   CASCADER_PANEL_INJECTION_KEY,
   reactive({
@@ -193,7 +278,14 @@ watch([() => props.options], initStore, {
 });
 
 watch(checkedValue, (val) => {
-  emits('update:modelValue', val);
+  if (val !== props.modelValue) {
+    emits('update:modelValue', val);
+  }
+});
+
+onMounted(() => {
+  !isEmpty(props.modelValue) && syncCheckedValue();
+  // !isEmpty(props.modelValue) && syncCheckedValueEasy();
 });
 </script>
 

@@ -1,7 +1,7 @@
 <!-- Node -->
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
+import { computed, inject, watch } from 'vue';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
 import type { default as CascaderNode } from './node';
 
@@ -59,6 +59,7 @@ const handleClick = () => {
   const { node } = props;
   console.log('🏄 # handleClick # node', node);
 
+  // 非叶子节点 —— 继续展开，到了叶子节点 —— 才会通知到 modelValue 的更新
   if (isLeaf.value) {
     handleCheck(true);
   } else {
