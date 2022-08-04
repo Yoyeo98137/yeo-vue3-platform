@@ -322,8 +322,8 @@ watch(
 
 // const value = ref('');
 // const value = ref('guide');
-// const value = ref('disciplines');
-const value = ref('consistency');
+const value = ref('disciplines');
+// const value = ref('consistency');
 const handleChange = (value: string) => {
   console.log('🏄 # handleChange # value', value);
 };
@@ -336,6 +336,9 @@ const handleChange = (value: string) => {
       <YeoCascader
         v-model="cascaderValue"
         :options="cascaderOptions"
+        :props="{
+          checkStrictly: true,
+        }"
         @change="changeCascader"
         @close="closeCascader"
       />
@@ -346,6 +349,9 @@ const handleChange = (value: string) => {
       <el-cascader
         v-model="value"
         :options="cascaderOptions"
+        :props="{
+          checkStrictly: true,
+        }"
         @change="handleChange"
       />
     </div>

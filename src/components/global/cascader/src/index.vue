@@ -8,6 +8,7 @@ import Store from './store';
 import Node from './node';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
 import { isEmpty, sortByOriginalChilds, unique } from './utils';
+import { useCascaderConfig } from './config';
 
 import type {
   default as CascaderNode,
@@ -34,6 +35,8 @@ const emits = defineEmits<{
   (e: 'change', values: CascaderNodePathValue): void;
   (e: 'close'): void;
 }>();
+
+const config = useCascaderConfig(props);
 
 let store: Nullable<Store> = null;
 const initialLoaded = ref(true);
@@ -64,7 +67,8 @@ const initStore = () => {
   */
   // menus.value = props.options;
 
-  const { options, props: cfg } = props;
+  const { options } = props;
+  const cfg = config.value;
 
   store = new Store(options, cfg);
   // 实际上，外面的这一层 [] 就应该代表着 parent
@@ -80,12 +84,15 @@ const initStore = () => {
         menus.value = [store.getNodes()];
       }
       initialLoaded.value = true;
+      // sync
     });
+  } else {
+    // sync
   }
 };
 
 const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
-  const cfg = props.props;
+  const cfg = config.value;
   node! = node || new Node({}, cfg, undefined, true);
   node.loading = true;
 
@@ -117,7 +124,7 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
 
   if (node.isLeaf) {
     // 暂时没动这个 level - 2 的含义，因为走到这里则说明后续没有再对 newExpandingNode 的逻辑处理
-    // 我的看法是等同于跟设置 null（undefined）
+    // 我的理解是等同于跟设置 null（undefined）
     // newExpandingNode = node.pathNodes[level - 2];
     newExpandingNode = null;
   } else {
@@ -178,8 +185,8 @@ const syncCheckedValue = (
   forced = false
 ) => {
   const { modelValue } = props;
-  // const { lazy, multiple, checkStrictly } = config.value;
-  const leafOnly = false;
+  const { checkStrictly } = config.value;
+  const leafOnly = !checkStrictly;
 
   // todo lazyLoad
 
@@ -189,11 +196,6 @@ const syncCheckedValue = (
       store?.getNodeByValue(val as CascaderNodeValue, leafOnly)
     )
   ) as Node[];
-  console.log('🏄 # syncCheckedValue # nodes', nodes);
-  console.log('🏄 # syncCheckedValue # modelValue', modelValue);
-  console.log('🏄 # syncCheckedValue # checkedValue.value', checkedValue.value);
-  console.log('');
-
   syncMenuState(nodes, forced);
   checkedValue.value = modelValue!;
 };
@@ -202,18 +204,22 @@ const syncMenuState = (
   /** "保留扩展状态" */
   reserveExpandingState = true
 ) => {
+  const { checkStrictly } = props.props;
   const oldNodes = checkedNodes.value;
   // 只查找叶子节点，正常的逻辑就是你如果需要做回显的话，肯定是具体到某个叶子节点
   // 而不是回显某个菜单
-  const newNodes = newCheckedNodes.filter((node) => !!node && node.isLeaf);
+  // checkStrictly 就对应着我们业务侧边栏的场景，不要求精确到某一个叶子节点选项，允许选择 "菜单节点" 作为值
+  // 这相当于对应分类筛选的场景，你可以具体到某一个单品类，你当然也可以仅筛选某个菜单分类
+  const newNodes = newCheckedNodes.filter(
+    (node) => !!node && (checkStrictly || node.isLeaf)
+  );
   console.log('🏄 # newCheckedNodes', newCheckedNodes);
   console.log('🏄 # syncMenuState # oldNodes', oldNodes);
   console.log('🏄 # syncMenuState # newNodes', newNodes);
 
   const oldExpandingNode = store?.getSameNode(expandingNode.value!);
-  const newExpandingNode = newNodes[0];
-  // const newExpandingNode =
-  //   (reserveExpandingState && oldExpandingNode) || newNodes[0];
+  const newExpandingNode =
+    (reserveExpandingState && oldExpandingNode) || newNodes[0];
   console.log('🏄 # oldExpandingNode', oldExpandingNode);
   console.log('🏄 # newExpandingNode', newExpandingNode);
 
@@ -231,6 +237,7 @@ const syncMenuState = (
   checkedNodes.value = newNodes;
 };
 
+// 自己的一个思考
 const syncCheckedValueEasy = () => {
   console.log('🏄 # syncCheckedValueEasy # modelValue', props.modelValue);
   console.log('🏄 # syncCheckedValueEasy # menus', menus.value);
