@@ -7,7 +7,7 @@ import YeoCascaderMenu from './menu.vue';
 import Store from './store';
 import Node from './node';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
-import { isEmpty, sortByOriginalChilds, unique } from './utils';
+import { isEmpty, sortByOriginalChilds } from './utils';
 import { useCascaderConfig } from './config';
 
 import type {
@@ -84,10 +84,7 @@ const initStore = () => {
         menus.value = [store.getNodes()];
       }
       initialLoaded.value = true;
-      // sync
     });
-  } else {
-    // sync
   }
 };
 
@@ -123,7 +120,7 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
   // console.log('🏄 # newMenus', newMenus);
 
   if (node.isLeaf) {
-    // 暂时没动这个 level - 2 的含义，因为走到这里则说明后续没有再对 newExpandingNode 的逻辑处理
+    // 暂时没懂这个 level - 2 的含义，因为走到这里则说明后续没有再对 newExpandingNode 的逻辑处理
     // 我的理解是等同于跟设置 null（undefined）
     // newExpandingNode = node.pathNodes[level - 2];
     newExpandingNode = null;
@@ -141,6 +138,7 @@ const expandNode: CascaderPanelContext['expandNode'] = (node) => {
     emits('change', node?.pathValues || []);
   }
 };
+
 const handleCheckChange: CascaderPanelContext['handleCheckChange'] = (
   node,
   checked,
@@ -179,64 +177,6 @@ const calculateCheckedValue = () => {
   checkedValue.value = values[0] ?? null;
 };
 
-const syncCheckedValue = (
-  loaded = false,
-  /** "强制" */
-  forced = false
-) => {
-  const { modelValue } = props;
-  const { checkStrictly } = config.value;
-  const leafOnly = !checkStrictly;
-
-  // todo lazyLoad
-
-  const values = [modelValue];
-  const nodes = unique(
-    values.map((val) =>
-      store?.getNodeByValue(val as CascaderNodeValue, leafOnly)
-    )
-  ) as Node[];
-  syncMenuState(nodes, forced);
-  checkedValue.value = modelValue!;
-};
-const syncMenuState = (
-  newCheckedNodes: CascaderNode[],
-  /** "保留扩展状态" */
-  reserveExpandingState = true
-) => {
-  const { checkStrictly } = props.props;
-  const oldNodes = checkedNodes.value;
-  // 只查找叶子节点，正常的逻辑就是你如果需要做回显的话，肯定是具体到某个叶子节点
-  // 而不是回显某个菜单
-  // checkStrictly 就对应着我们业务侧边栏的场景，不要求精确到某一个叶子节点选项，允许选择 "菜单节点" 作为值
-  // 这相当于对应分类筛选的场景，你可以具体到某一个单品类，你当然也可以仅筛选某个菜单分类
-  const newNodes = newCheckedNodes.filter(
-    (node) => !!node && (checkStrictly || node.isLeaf)
-  );
-  console.log('🏄 # newCheckedNodes', newCheckedNodes);
-  console.log('🏄 # syncMenuState # oldNodes', oldNodes);
-  console.log('🏄 # syncMenuState # newNodes', newNodes);
-
-  const oldExpandingNode = store?.getSameNode(expandingNode.value!);
-  const newExpandingNode =
-    (reserveExpandingState && oldExpandingNode) || newNodes[0];
-  console.log('🏄 # oldExpandingNode', oldExpandingNode);
-  console.log('🏄 # newExpandingNode', newExpandingNode);
-
-  if (newExpandingNode) {
-    // 将新节点路径集中所有父节点展开，从而还原路径链
-    // 而这个新节点本身是叶子节点，在 expandNode 会跳过响应的执行
-    newExpandingNode.pathNodes.forEach((node) => expandNode(node));
-  } else {
-    expandingNode.value = null;
-  }
-
-  // 复原 checked 状态，相当于补全 handleCheckChange 的逻辑
-  oldNodes.forEach((node) => node.doCheck(false));
-  newNodes.forEach((node) => node.doCheck(true));
-  checkedNodes.value = newNodes;
-};
-
 // 自己的一个思考
 const syncCheckedValueEasy = () => {
   console.log('🏄 # syncCheckedValueEasy # modelValue', props.modelValue);
@@ -265,6 +205,57 @@ const syncCheckedValueEasy = () => {
     maxExpand--;
   }
 };
+const syncCheckedValue = () => {
+  const { modelValue } = props;
+  const { checkStrictly } = config.value;
+  const leafOnly = !checkStrictly;
+
+  // 如果初始化的加载还没有结束
+  if (!initialLoaded.value) return;
+
+  // Find that sync node
+  const values = [modelValue];
+  const nodes = values.map((val) =>
+    store?.getNodeByValue(val as CascaderNodeValue, leafOnly)
+  ) as Node[];
+
+  console.log('');
+  console.log('🏄 # syncCheckedValue # nodes', nodes);
+  syncMenuState(nodes);
+  checkedValue.value = modelValue!;
+};
+const syncMenuState = (newCheckedNodes: CascaderNode[]) => {
+  const { checkStrictly } = props.props;
+  const oldNodes = checkedNodes.value;
+  // 只查找叶子节点，正常的逻辑就是你如果需要做回显的话，肯定是具体到某个叶子节点
+  // 而不是回显某个菜单
+  // checkStrictly 就对应着我们业务侧边栏的场景，不要求精确到某一个叶子节点选项，允许选择 "菜单节点" 作为值
+  // 这相当于对应分类筛选的场景，你可以具体到某一个单品类，你当然也可以仅筛选某个菜单分类
+  const newNodes = newCheckedNodes.filter(
+    (node) => !!node && (checkStrictly || node.isLeaf)
+  );
+  console.log('🏄 # newCheckedNodes', newCheckedNodes);
+  console.log('🏄 # syncMenuState # oldNodes', oldNodes);
+  console.log('🏄 # syncMenuState # newNodes', newNodes);
+
+  const oldExpandingNode = store?.getSameNode(expandingNode.value!);
+  const newExpandingNode = oldExpandingNode || newNodes[0];
+  console.log('🏄 # oldExpandingNode', oldExpandingNode);
+  console.log('🏄 # newExpandingNode', newExpandingNode);
+
+  if (newExpandingNode) {
+    // 将新节点路径集中所有父节点展开，从而还原路径链
+    // 而这个新节点本身是叶子节点，在 expandNode 会跳过响应的执行
+    newExpandingNode.pathNodes.forEach((node) => expandNode(node));
+  } else {
+    expandingNode.value = null;
+  }
+
+  // 复原 checked 状态，相当于补全 handleCheckChange 的逻辑
+  oldNodes.forEach((node) => node.doCheck(false));
+  newNodes.forEach((node) => node.doCheck(true));
+  checkedNodes.value = newNodes;
+};
 
 provide(
   CASCADER_PANEL_INJECTION_KEY,
@@ -277,9 +268,7 @@ provide(
   })
 );
 
-// todo
-// config,
-watch([() => props.options], initStore, {
+watch(() => props.options, initStore, {
   deep: true,
   immediate: true,
 });
@@ -291,8 +280,8 @@ watch(checkedValue, (val) => {
 });
 
 onMounted(() => {
-  !isEmpty(props.modelValue) && syncCheckedValue();
   // !isEmpty(props.modelValue) && syncCheckedValueEasy();
+  !isEmpty(props.modelValue) && syncCheckedValue();
 });
 </script>
 

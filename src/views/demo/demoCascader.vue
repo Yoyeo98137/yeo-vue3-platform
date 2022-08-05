@@ -4,12 +4,12 @@ import type {
   CascaderProps,
   CascaderNodePathValue,
 } from '@/components/global/cascader';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-// const cascaderValue = ref('');
+const cascaderValue = ref('');
 // const cascaderValue = ref('guide');
 // const cascaderValue = ref('disciplines');
-const cascaderValue = ref('consistency');
+// const cascaderValue = ref('consistency');
 const cascaderOptions = [
   {
     value: 'guide',
@@ -278,18 +278,116 @@ const cascaderOptions = [
     ],
   },
 ];
+
+// const lazyCascaderValue = ref('resource');
+// const lazyCascaderValue = ref('axure');
+const lazyCascaderValue = ref('consistency');
+const lazyCascaderOptions = ref<any[]>([]);
+const isRenderLazyCascader = ref(false);
+onMounted(() => {
+  setTimeout(() => {
+    lazyCascaderOptions.value = [
+      {
+        value: 'guide',
+        label: 'Guide',
+        children: [
+          {
+            value: 'disciplines',
+            label: 'Disciplines',
+            children: [
+              {
+                value: 'consistency',
+                label: 'Consistency',
+                leaf: true,
+              },
+              {
+                value: 'feedback',
+                label: 'Feedback',
+                leaf: true,
+              },
+              {
+                value: 'efficiency',
+                label: 'Efficiency',
+                leaf: true,
+              },
+              {
+                value: 'controllability',
+                label: 'Controllability',
+                leaf: true,
+              },
+            ],
+          },
+          {
+            value: 'navigation',
+            label: 'Navigation',
+            children: [
+              {
+                value: 'side nav',
+                label: 'Side Navigation',
+              },
+              {
+                value: 'top nav',
+                label: 'Top Navigation',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        value: 'resource',
+        label: 'Resource',
+        children: [
+          {
+            value: 'axure',
+            label: 'Axure Components',
+          },
+          {
+            value: 'sketch',
+            label: 'Sketch Templates',
+          },
+          {
+            value: 'docs',
+            label: 'Design Documentation',
+          },
+        ],
+      },
+    ];
+    isRenderLazyCascader.value = true;
+  }, 860);
+});
+
+let cId = 0;
+
+const lazyProps: CascaderProps = {
+  lazy: true,
+  lazyLoad: (node, resolve) => {
+    const { level } = node;
+    console.log('🏄 # node', node);
+
+    setTimeout(() => {
+      const nodes = Array.from({ length: level + 1 }).map(() => ({
+        value: ++cId,
+        label: `Option - ${cId}`,
+        leaf: level >= 2,
+      }));
+      resolve(nodes);
+    }, 1000);
+  },
+  checkStrictly: true,
+};
+
 const changeCascader = (values: CascaderNodePathValue) => {
-  // console.log('');
-  // console.log('🏄 # -----------');
-  // console.log('🏄 # ----------- changeCascader # values', values);
+  console.log('');
+  console.log('🏄 # -----------');
+  console.log('🏄 # ----------- changeCascader # values', values);
 };
 const closeCascader = () => {
-  // console.log('');
-  // console.log('🏄 # -----------');
-  // console.log(
-  //   '🏄 # ----------- closeCascader # cascaderValue',
-  //   cascaderValue.value
-  // );
+  console.log('');
+  console.log('🏄 # -----------');
+  console.log(
+    '🏄 # ----------- closeCascader # cascaderValue',
+    cascaderValue.value
+  );
 };
 
 // ----------------
@@ -333,7 +431,9 @@ const handleChange = (value: string) => {
   <ElCard class="cc-padding">
     <div>级联组件尝试</div>
     <div class="cascader-box">
-      <YeoCascader
+      <!-- 先定义好 options，其中已经有了部分值，基于这部分值补充回显，其余选项仍然是动态加载的，跟之前调试城市一样 -->
+
+      <!-- <YeoCascader
         v-model="cascaderValue"
         :options="cascaderOptions"
         :props="{
@@ -341,19 +441,33 @@ const handleChange = (value: string) => {
         }"
         @change="changeCascader"
         @close="closeCascader"
-      />
+      /> -->
       <!-- <YeoCascader v-model="cascaderValue" :props="cascaderProps" /> -->
+      <YeoCascader
+        v-if="isRenderLazyCascader"
+        v-model="lazyCascaderValue"
+        :options="lazyCascaderOptions"
+        :props="lazyProps"
+      />
     </div>
     <!-- 对比 -->
     <div class="cascader-box">
-      <el-cascader
+      <!-- <el-cascader
         v-model="value"
         :options="cascaderOptions"
         :props="{
           checkStrictly: true,
         }"
         @change="handleChange"
-      />
+      /> -->
+      <!-- <el-cascader
+        v-model="value"
+        :options="cascaderOptions"
+        :props="{
+          checkStrictly: true,
+        }"
+        @change="handleChange"
+      /> -->
     </div>
   </ElCard>
 </template>
