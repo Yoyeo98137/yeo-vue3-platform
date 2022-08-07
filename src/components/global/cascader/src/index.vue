@@ -1,7 +1,16 @@
 <!-- Cascader container -->
 
 <script lang="ts" setup>
-import { nextTick, onMounted, provide, reactive, Ref, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onMounted,
+  provide,
+  reactive,
+  Ref,
+  ref,
+  watch,
+} from 'vue';
 import YeoCascaderMenu from './menu.vue';
 
 import Store from './store';
@@ -31,8 +40,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emits = defineEmits<{
-  (e: 'update:modelValue', value: Nullable<CascaderValue>): void;
-  (e: 'change', values: CascaderNodePathValue): void;
+  (e: 'update:modelValue', ...args: any[]): void;
+  (e: 'change', ...args: any[]): void;
+  (e: 'expand-change', values: CascaderNodePathValue): void;
   (e: 'close'): void;
 }>();
 
@@ -88,10 +98,13 @@ const initStore = () => {
   }
 };
 
+const loadingStore = ref<CascaderNode[]>([]);
+const isAllNodeLoaded = computed(() => loadingStore.value.length === 0);
 const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
   const cfg = config.value;
   node! = node || new Node({}, cfg, undefined, true);
   node.loading = true;
+  loadingStore.value.push(node);
 
   // 闭包
   const resolve = (dataList: CascaderOption[]) => {
@@ -101,6 +114,10 @@ const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
     dataList && store?.appendNodes(dataList, parent!);
 
     _node.loading = false;
+
+    const findIdx = loadingStore.value.findIndex((n) => n.uid === _node.uid);
+    findIdx > 0 && loadingStore.value.splice(findIdx, 1);
+
     _node.loaded = true;
     _node.childrenData = _node.childrenData || [];
     cb && cb(dataList);
@@ -111,31 +128,38 @@ const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
 };
 
 const expandNode: CascaderPanelContext['expandNode'] = (node) => {
-  const { level } = node;
+  const { level, isLeaf } = node;
   const newMenus = menus.value.slice(0, level);
   let newExpandingNode: Nullable<CascaderNode>;
 
   // console.log('🏄 # level', level);
   // console.log('🏄 # level - 2', level - 2);
-  // console.log('🏄 # newMenus', newMenus);
 
-  if (node.isLeaf) {
+  if (isLeaf) {
     // 暂时没懂这个 level - 2 的含义，因为走到这里则说明后续没有再对 newExpandingNode 的逻辑处理
     // 我的理解是等同于跟设置 null（undefined）
     // newExpandingNode = node.pathNodes[level - 2];
     newExpandingNode = null;
   } else {
     newExpandingNode = node;
+    // 在前面的菜单之后，添加新菜单
     newMenus.push(node.children);
   }
+
+  // console.log('🏄 # ---- expandNode # menus.value', menus.value);
+  // console.log('🏄 # ---- expandNode # newMenus', newMenus);
+  // console.log(
+  //   '🏄 # ---- expandNode # expandingNode.value',
+  //   expandingNode.value
+  // );
+  // console.log('🏄 # ---- expandNode # newExpandingNode', newExpandingNode);
 
   if (expandingNode.value?.uid !== newExpandingNode?.uid) {
     console.log('🏄 # ---- 触发渲染了新的展开节点');
 
-    // push next menu
-    menus.value = newMenus;
     expandingNode.value = node;
-    emits('change', node?.pathValues || []);
+    menus.value = newMenus;
+    emits('expand-change', node?.pathValues || []);
   }
 };
 
@@ -164,16 +188,18 @@ const getFlattedNodes = (leafOnly: boolean) => {
 const getCheckedNodes = (leafOnly: boolean) => {
   return getFlattedNodes(leafOnly)?.filter((node) => node.checked);
 };
+
 const calculateCheckedValue = () => {
-  const isLeafOnly = false;
+  const { checkStrictly } = config.value;
   const oldNodes = checkedNodes.value;
-  const newNodes = getCheckedNodes(isLeafOnly)!;
+  const newNodes = getCheckedNodes(!checkStrictly)!;
   // 保证原本的节点排序，这将在多选模式下起到作用
   const nodes = sortByOriginalChilds(oldNodes, newNodes);
   console.log('🏄 # calculateCheckedValue # nodes', nodes);
   checkedNodes.value = nodes;
 
   const values = nodes.map((node) => node.valueByOption);
+  // console.log('🏄 # calculateCheckedValue # values', values);
   checkedValue.value = values[0] ?? null;
 };
 
@@ -260,6 +286,8 @@ const syncMenuState = (newCheckedNodes: CascaderNode[]) => {
 provide(
   CASCADER_PANEL_INJECTION_KEY,
   reactive({
+    config,
+    checkedNodes,
     expandingNode,
     initialLoaded,
     lazyLoad,
@@ -276,12 +304,19 @@ watch(() => props.options, initStore, {
 watch(checkedValue, (val) => {
   if (val !== props.modelValue) {
     emits('update:modelValue', val);
+    emits('change', val);
   }
 });
 
 onMounted(() => {
   // !isEmpty(props.modelValue) && syncCheckedValueEasy();
   !isEmpty(props.modelValue) && syncCheckedValue();
+});
+
+defineExpose({
+  isAllNodeLoaded,
+  checkedNodes,
+  getCheckedNodes,
 });
 </script>
 
