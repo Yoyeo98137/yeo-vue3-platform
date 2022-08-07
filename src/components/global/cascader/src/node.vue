@@ -1,7 +1,7 @@
 <!-- Node -->
 
 <script lang="ts" setup>
-import { computed, inject, watch } from 'vue';
+import { computed, inject } from 'vue';
 import { CASCADER_PANEL_INJECTION_KEY } from './types';
 import type { default as CascaderNode } from './node';
 
@@ -13,11 +13,22 @@ const props = defineProps<Props>();
 // get Context
 const panel = inject(CASCADER_PANEL_INJECTION_KEY)!;
 
+const curcheckedNodes = computed(() => panel.checkedNodes);
+const checkStrictly = computed(() => panel.config.checkStrictly);
 const isLeaf = computed(() => props.node.isLeaf);
 const isChecked = computed(() => props.node.checked);
-/** 可扩展的 —— 非叶子节点 */
-const expandable = computed(() => !isLeaf.value);
 const inExpandingPath = computed(() => isInPath(panel.expandingNode));
+/** 是否还没有越过当前选中的节点层级 */
+const unCrossedTheCheckedYet = computed(() => {
+  if (!curcheckedNodes.value.length || !checkStrictly.value)
+    return inExpandingPath.value;
+  else {
+    const checkedLevel = curcheckedNodes.value[0].level;
+    const curLevel = props.node.level;
+
+    return inExpandingPath.value && curLevel <= checkedLevel;
+  }
+});
 
 const isInPath = (node: CascaderNode) => {
   const { level, uid } = props.node;
@@ -32,35 +43,40 @@ const doCheck = (checked: boolean) => {
   if (checked === node.checked) return;
   panel.handleCheckChange(node, checked);
 };
-const doLoad = () => {
+const doExpand = () => {
+  // `checkStrictly` 模式下，展开节点的同时也需要更改当前节点的 `checked` 状态
+  // 同时也要避免重复更新状态
+  if (checkStrictly.value && !isChecked.value) {
+    doCheck(true);
+  }
+
+  if (inExpandingPath.value) return;
+  panel.expandNode(props.node);
+};
+const doLoadExpand = () => {
   panel.lazyLoad(props.node, () => {
     if (!isLeaf.value) doExpand();
   });
 };
-const doExpand = () => {
-  if (inExpandingPath.value) return;
-  panel.expandNode(props.node);
-};
 
 const handleCheck = (checked: boolean) => {
   if (!props.node.loaded) {
-    doLoad();
+    doLoadExpand();
   } else {
     doCheck(checked);
   }
 };
 const handleExpand = () => {
   const { loading, loaded } = props.node;
-  if (!expandable.value || loading) return;
-  loaded ? doExpand() : doLoad();
+  if (loading) return;
+  loaded ? doExpand() : doLoadExpand();
 };
 
 const handleClick = () => {
   const { node } = props;
-  console.log('🏄 # handleClick # node', node);
+  console.log('🏄 # Node # handleClick # node', node);
 
-  // 非叶子节点 —— 继续展开，到了叶子节点 —— 才会通知到 modelValue 的更新
-  if (isLeaf.value) {
+  if (isLeaf.value && !checkStrictly.value) {
     handleCheck(true);
   } else {
     handleExpand();
@@ -72,7 +88,7 @@ const handleClick = () => {
   <div
     class="y-node-content"
     :class="[
-      inExpandingPath ? 'in-active-path' : '',
+      unCrossedTheCheckedYet ? 'in-active-path' : '',
       isChecked ? 'is-active' : '',
     ]"
     @click="handleClick"
