@@ -116,9 +116,17 @@ class Node {
     return node;
   }
 
+  setCheckState(checked: boolean, leafOnly = false) {
+    if (leafOnly) this.checked = checked;
+    else
+      this.checked =
+        this.loaded && this.children.every((child) => child.loaded) && checked;
+  }
+
   doCheck(checked: boolean) {
     if (this.checked === checked) return;
-    this.checked = checked;
+    const { checkStrictly } = this.config;
+    this.setCheckState(checked, checkStrictly);
   }
 }
 
