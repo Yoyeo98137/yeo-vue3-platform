@@ -7,11 +7,13 @@ export interface CascaderProps {
   lazy?: boolean;
   lazyLoad?: LazyLoad;
   /** 是否严格的遵守父子节点不互相关联，通俗来说就是选中的路径，是否一定要以叶子节点来结尾 */
-  checkStrictly?: boolean
+  checkStrictly?: boolean;
 }
 export type CascaderConfig = Required<CascaderProps>;
 
 export interface CascaderPanelContext {
+  config: CascaderConfig;
+  checkedNodes: CascaderNode[];
   expandingNode: CascaderNode;
   initialLoaded: boolean;
   lazyLoad: (
