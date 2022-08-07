@@ -95,9 +95,7 @@ class Node {
   }
 
   get valueByOption() {
-    return this.value;
-    // 是否需要抛出完整的值路径
-    // return this.config.emitPath ? this.pathValues : this.value;
+    return this.config.emitPath ? this.pathValues : this.value;
   }
 
   appendChild(childData: CascaderOption) {

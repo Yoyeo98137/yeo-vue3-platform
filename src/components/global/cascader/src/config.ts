@@ -3,6 +3,7 @@ import { CascaderConfig, CascaderProps } from './types';
 
 export const DefaultProps: CascaderConfig = {
   checkStrictly: false, // whether all nodes can be selected
+  emitPath: false,
   lazy: false,
   lazyLoad: () => {},
 };

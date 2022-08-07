@@ -8,6 +8,8 @@ export interface CascaderProps {
   lazyLoad?: LazyLoad;
   /** 是否严格的遵守父子节点不互相关联，通俗来说就是选中的路径，是否一定要以叶子节点来结尾 */
   checkStrictly?: boolean;
+  /** 是否需要抛出完整的值路径 */
+  emitPath?: boolean;
 }
 export type CascaderConfig = Required<CascaderProps>;
 
