@@ -116,7 +116,7 @@ const lazyLoad: CascaderPanelContext['lazyLoad'] = (node, cb) => {
     _node.loading = false;
 
     const findIdx = loadingStore.value.findIndex((n) => n.uid === _node.uid);
-    findIdx > 0 && loadingStore.value.splice(findIdx, 1);
+    findIdx >= 0 && loadingStore.value.splice(findIdx, 1);
 
     _node.loaded = true;
     _node.childrenData = _node.childrenData || [];
