@@ -182,6 +182,9 @@ const handleCheckChange: CascaderPanelContext['handleCheckChange'] = (
   });
 };
 
+const getCheckedLabels = (leafOnly: boolean) => {
+  return getCheckedNodes(leafOnly)?.map((node) => node.label);
+};
 const getFlattedNodes = (leafOnly: boolean) => {
   return store?.getFlattedNodes(leafOnly);
 };
@@ -317,6 +320,7 @@ defineExpose({
   isAllNodeLoaded,
   checkedNodes,
   getCheckedNodes,
+  getCheckedLabels,
 });
 </script>
 

@@ -303,11 +303,13 @@ const changeChooseVal = (val: string) => {
 };
 const handleSendSubmit = () => {
   const checkeds = chooseRef.value?.getCheckedNodes(false);
+  const labels = chooseRef.value?.getCheckedLabels(false);
   const isAllNodeLoaded = chooseRef.value?.isAllNodeLoaded;
 
   if (!isAllNodeLoaded) return;
 
   console.log('🏄 # handleSendSubmit # checkeds', checkeds);
+  console.log('🏄 # handleSendSubmit # labels', labels);
   console.log('🏄 # handleSendSubmit # isAllNodeLoaded', isAllNodeLoaded);
 };
 </script>
