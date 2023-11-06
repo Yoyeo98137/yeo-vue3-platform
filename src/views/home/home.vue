@@ -231,6 +231,9 @@ onMounted(async () => {
 
   // 4 最后打开级联组件渲染限制
   renderCascader.value = true;
+
+  // ----------------------------------
+  console.log('test login')
 });
 </script>
 
